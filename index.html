@@ -1,17 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title></title>
-</head> Why Wenyao Likes Isabelle, Yicheng Likes Emily
+  <meta charset="UTF-8">
+  <title>Simple Clicker Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 40px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #score {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    #clicker {
+      cursor: pointer;
+      width: 200px;
+      transition: transform 0.1s;
+    }
+
+    #clicker:active {
+      transform: scale(0.95);
+    }
+
+    .shop {
+      margin-top: 30px;
+    }
+
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
 <body>
 
-	<img src= "Wenyao.png">  </img>
+  <h1>My Clicker Game</h1>
+  <div id="score">Clicks: 0</div>
 
-	<img src= "heart.png"> </img>
+  <!-- Clickable image -->
+  <img id="clicker" src="Yicheng.png" alt="Click me">
 
-	<img src= "Isabelle.png"> </img>
-	
+  <div class="shop">
+    <h2>Upgrades</h2>
+    <button onclick="buyUpgrade()">
+      Buy Auto Clicker (Cost: <span id="upgradeCost">10</span>)
+    </button>
+    <div>Auto Clickers: <span id="autoClickers">0</span></div>
+  </div>
 
+  <script>
+    let clicks = 0;
+    let autoClickers = 0;
+    let upgradeCost = 10;
+
+    const scoreEl = document.getElementById("score");
+    const upgradeCostEl = document.getElementById("upgradeCost");
+    const autoClickersEl = document.getElementById("autoClickers");
+    const clickerEl = document.getElementById("clicker");
+
+    // Manual click
+    clickerEl.addEventListener("click", () => {
+      clicks++;
+      updateUI();
+    });
+
+    // Buy upgrade
+    function buyUpgrade() {
+      if (clicks >= upgradeCost) {
+        clicks -= upgradeCost;
+        autoClickers++;
+        upgradeCost = Math.floor(upgradeCost * 1.5);
+        updateUI();
+      }
+    }
+
+    // Auto clicker loop
+    setInterval(() => {
+      clicks += autoClickers;
+      updateUI();
+    }, 1000);
+
+    function updateUI() {
+      scoreEl.textContent = "Clicks: " + clicks;
+      upgradeCostEl.textContent = upgradeCost;
+      autoClickersEl.textContent = autoClickers;
+    }
+  </script>
+
+</body>
+</html>
 
