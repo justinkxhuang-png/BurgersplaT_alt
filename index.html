@@ -2,32 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Simple Clicker Game</title>
+  <title>Clicker Game</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #f2f2f2;
       text-align: center;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 40px;
+      padding: 30px;
     }
 
     h1 {
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
 
-    #score {
-      font-size: 24px;
+    #stats {
+      font-size: 20px;
       margin-bottom: 20px;
     }
 
-    #clicker {
-      cursor: pointer;
+    .clicker {
       width: 200px;
+      cursor: pointer;
       transition: transform 0.1s;
     }
 
-    #clicker:active {
+    .clicker:active {
       transform: scale(0.95);
     }
 
@@ -35,9 +34,23 @@
       margin-top: 30px;
     }
 
+    .upgrade {
+      background: white;
+      padding: 15px;
+      margin: 15px auto;
+      width: 300px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .upgrade img {
+      width: 80px;
+      cursor: pointer;
+    }
+
     button {
-      padding: 10px 15px;
-      font-size: 16px;
+      margin-top: 10px;
+      padding: 8px 12px;
       cursor: pointer;
     }
   </style>
@@ -45,55 +58,99 @@
 <body>
 
   <h1>My Clicker Game</h1>
-  <div id="score">Clicks: 0</div>
+  <div id="stats">
+    Clicks: <span id="clicks">0</span><br>
+    Per Second: <span id="cps">0</span>
+  </div>
 
-  <!-- Clickable image -->
-  <img id="clicker" src="Yicheng.png" alt="Click me">
+  <!-- MAIN CLICKER -->
+  <img class="clicker" src="Yicheng.png" alt="Main Clicker" id="mainClicker">
 
   <div class="shop">
     <h2>Upgrades</h2>
-    <button onclick="buyUpgrade()">
-      Buy Auto Clicker (Cost: <span id="upgradeCost">10</span>)
-    </button>
-    <div>Auto Clickers: <span id="autoClickers">0</span></div>
+
+    <!-- UPGRADE 1 (GRANDMA STYLE) -->
+    <div class="upgrade">
+      <h3>Helper</h3>
+      <img src="Wenyao.png" alt="Upgrade 1">
+      <p>+1 click / second</p>
+      <button onclick="buyUpgrade1()">
+        Buy (Cost: <span id="cost1">15</span>)
+      </button>
+      <p>Owned: <span id="count1">0</span></p>
+    </div>
+
+    <!-- UPGRADE 2 (FARM STYLE) -->
+    <div class="upgrade">
+      <h3>Factory</h3>
+      <img src="Owen.png" alt="Upgrade 2">
+      <p>+5 clicks / second</p>
+      <button onclick="buyUpgrade2()">
+        Buy (Cost: <span id="cost2">100</span>)
+      </button>
+      <p>Owned: <span id="count2">0</span></p>
+    </div>
   </div>
 
   <script>
     let clicks = 0;
-    let autoClickers = 0;
-    let upgradeCost = 10;
 
-    const scoreEl = document.getElementById("score");
-    const upgradeCostEl = document.getElementById("upgradeCost");
-    const autoClickersEl = document.getElementById("autoClickers");
-    const clickerEl = document.getElementById("clicker");
+    let upgrade1 = 0;
+    let upgrade2 = 0;
 
-    // Manual click
-    clickerEl.addEventListener("click", () => {
+    let cost1 = 15;
+    let cost2 = 100;
+
+    const clicksEl = document.getElementById("clicks");
+    const cpsEl = document.getElementById("cps");
+
+    const cost1El = document.getElementById("cost1");
+    const cost2El = document.getElementById("cost2");
+
+    const count1El = document.getElementById("count1");
+    const count2El = document.getElementById("count2");
+
+    document.getElementById("mainClicker").onclick = () => {
       clicks++;
       updateUI();
-    });
+    };
 
-    // Buy upgrade
-    function buyUpgrade() {
-      if (clicks >= upgradeCost) {
-        clicks -= upgradeCost;
-        autoClickers++;
-        upgradeCost = Math.floor(upgradeCost * 1.5);
+    function buyUpgrade1() {
+      if (clicks >= cost1) {
+        clicks -= cost1;
+        upgrade1++;
+        cost1 = Math.floor(cost1 * 1.4);
         updateUI();
       }
     }
 
-    // Auto clicker loop
+    function buyUpgrade2() {
+      if (clicks >= cost2) {
+        clicks -= cost2;
+        upgrade2++;
+        cost2 = Math.floor(cost2 * 1.6);
+        updateUI();
+      }
+    }
+
+    function getCPS() {
+      return (upgrade1 * 1) + (upgrade2 * 5);
+    }
+
     setInterval(() => {
-      clicks += autoClickers;
+      clicks += getCPS();
       updateUI();
     }, 1000);
 
     function updateUI() {
-      scoreEl.textContent = "Clicks: " + clicks;
-      upgradeCostEl.textContent = upgradeCost;
-      autoClickersEl.textContent = autoClickers;
+      clicksEl.textContent = clicks;
+      cpsEl.textContent = getCPS();
+
+      cost1El.textContent = cost1;
+      cost2El.textContent = cost2;
+
+      count1El.textContent = upgrade1;
+      count2El.textContent = upgrade2;
     }
   </script>
 
