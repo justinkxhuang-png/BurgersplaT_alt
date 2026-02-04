@@ -56,7 +56,7 @@ body {
 .clicker {
   width: 260px;
   cursor: pointer;
-  transition: transform 0.1s, filter 0.2s;
+  transition: transform 0.1s;
 }
 
 .clicker:active {
@@ -78,7 +78,7 @@ body {
 
 /* RIGHT */
 .right {
-  width: 400px;
+  width: 420px;
   background: rgba(255,255,255,0.95);
   color: #222;
   padding: 20px;
@@ -90,6 +90,7 @@ body {
   margin-bottom: 20px;
 }
 
+/* UPGRADE CARD */
 .upgrade {
   background: white;
   border-radius: 16px;
@@ -97,6 +98,7 @@ body {
   margin-bottom: 18px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   transition: transform 0.15s;
+  border: 3px solid transparent;
 }
 
 .upgrade:hover {
@@ -107,6 +109,15 @@ body {
   outline: 3px solid gold;
 }
 
+/* RARITY BORDERS */
+.common     { border-color: #9e9e9e; }
+.uncommon   { border-color: #4caf50; box-shadow: 0 0 12px rgba(76,175,80,0.4); }
+.rare       { border-color: #2196f3; box-shadow: 0 0 14px rgba(33,150,243,0.45); }
+.epic       { border-color: #9c27b0; box-shadow: 0 0 16px rgba(156,39,176,0.5); }
+.mythic     { border-color: #e91e63; box-shadow: 0 0 18px rgba(233,30,99,0.55); }
+.legendary  { border-color: gold; box-shadow: 0 0 22px rgba(255,215,0,0.8); }
+
+/* CONTENT */
 .upgrade img.main {
   width: 80px;
 }
@@ -123,11 +134,6 @@ body {
   width: 24px;
   height: 24px;
   border-radius: 6px;
-  transition: transform 0.1s;
-}
-
-.mini-icons img:hover {
-  transform: scale(1.2);
 }
 
 .buttons {
@@ -137,161 +143,4 @@ body {
   margin-top: 10px;
 }
 
-button {
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-}
 
-.buy {
-  background: #4CAF50;
-  color: white;
-}
-
-.buy:disabled {
-  background: #aaa;
-  cursor: not-allowed;
-}
-
-.equip {
-  background: #2196F3;
-  color: white;
-}
-</style>
-</head>
-
-<body>
-
-<div class="header">🔥 My Clicker Game</div>
-
-<div class="container">
-
-  <!-- LEFT -->
-  <div class="left">
-    <div class="stats">
-      Clicks: <span id="clicks">0</span><br>
-      CPS: <span id="cps">0</span>
-    </div>
-
-    <div class="clicker-wrapper" id="clickerWrapper">
-      <img id="mainClicker" class="clicker" src="YIcheng_4.png">
-    </div>
-  </div>
-
-  <!-- RIGHT -->
-  <div class="right">
-    <h2>Upgrades</h2>
-    <div id="upgrades"></div>
-  </div>
-
-</div>
-
-<script>
-let clicks = 0;
-let equippedClicker = "YIcheng_4.png";
-
-const upgrades = [
-  { name:"Failure", cps:1, cost:50, scale:1.3, count:0, img:"Yicheng_2.png" },
-  { name:"Forehead", cps:10, cost:500, scale:1.35, count:0, img:"Wenyao_2.png" },
-  { name:"Grade 3 Pianist", cps:50, cost:2500, scale:1.4, count:0, img:"Wenyao.png" },
-  { name:"Entrepreneur", cps:250, cost:10000, scale:1.45, count:0, img:"Yicheng_3.png" },
-  { name:"Ascended to Heaven", cps:999, cost:50000, scale:1.5, count:0, img:"Yicheng.png" }
-];
-
-const upgradesDiv = document.getElementById("upgrades");
-const clicker = document.getElementById("mainClicker");
-
-function format(n) {
-  if (n >= 1e9) return (n/1e9).toFixed(2) + "B";
-  if (n >= 1e6) return (n/1e6).toFixed(2) + "M";
-  if (n >= 1e3) return (n/1e3).toFixed(1) + "K";
-  return Math.floor(n);
-}
-
-function getCPS() {
-  return upgrades.reduce((sum,u)=>sum+u.count*u.cps,0);
-}
-
-clicker.onclick = () => {
-  clicks++;
-  spawnFloat("+1");
-  updateUI();
-};
-
-function spawnFloat(text) {
-  const span = document.createElement("span");
-  span.className = "floating";
-  span.textContent = text;
-  span.style.left = Math.random()*120 + "px";
-  document.getElementById("clickerWrapper").appendChild(span);
-  setTimeout(()=>span.remove(),1000);
-}
-
-function buy(i) {
-  if (clicks >= upgrades[i].cost) {
-    clicks -= upgrades[i].cost;
-    upgrades[i].count++;
-    upgrades[i].cost = Math.floor(upgrades[i].cost * upgrades[i].scale);
-    updateUI();
-  }
-}
-
-function equip(i) {
-  equippedClicker = upgrades[i].img;
-  clicker.src = equippedClicker;
-  updateUI();
-}
-
-function renderUpgrades() {
-  upgradesDiv.innerHTML = "";
-
-  upgrades.forEach((u,i)=>{
-    const div = document.createElement("div");
-    div.className = "upgrade" + (equippedClicker === u.img ? " equipped" : "");
-
-    // Mini icons (max 8 shown)
-    let iconsHTML = "";
-    const maxIcons = 8;
-    const shown = Math.min(u.count, maxIcons);
-    for (let j=0;j<shown;j++) {
-      iconsHTML += `<img src="${u.img}">`;
-    }
-    if (u.count > maxIcons) {
-      iconsHTML += `<span>+${u.count - maxIcons}</span>`;
-    }
-
-    div.innerHTML = `
-      <img src="${u.img}" class="main">
-      <h3>${u.name}</h3>
-      <p>+${u.cps} CPS</p>
-      <p>Owned: ${u.count}</p>
-      <div class="mini-icons">${iconsHTML}</div>
-      <div class="buttons">
-        <button class="buy" onclick="buy(${i})" ${clicks < u.cost ? "disabled" : ""}>
-          Buy (${format(u.cost)})
-        </button>
-        ${u.count > 0 ? `<button class="equip" onclick="equip(${i})">Equip</button>` : ""}
-      </div>
-    `;
-    upgradesDiv.appendChild(div);
-  });
-}
-
-function updateUI() {
-  document.getElementById("clicks").textContent = format(clicks);
-  document.getElementById("cps").textContent = format(getCPS());
-  renderUpgrades();
-}
-
-setInterval(()=>{
-  clicks += getCPS();
-  updateUI();
-},1000);
-
-updateUI();
-</script>
-
-</body>
-</html>
