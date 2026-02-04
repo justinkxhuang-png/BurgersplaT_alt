@@ -5,150 +5,171 @@
 <title>Clicker Game</title>
 
 <style>
-  * {
-    box-sizing: border-box;
-  }
+* { box-sizing: border-box; }
 
-  body {
-    margin: 0;
-    font-family: "Segoe UI", sans-serif;
-    background: linear-gradient(135deg, #1d2671, #c33764);
-    color: white;
-  }
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #141e30, #243b55);
+  color: white;
+}
 
-  .container {
-    display: flex;
-    height: 100vh;
-  }
+/* HEADER */
+.header {
+  height: 60px;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
 
-  /* LEFT SIDE */
-  .left {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-  }
+/* LAYOUT */
+.container {
+  display: flex;
+  height: calc(100vh - 60px);
+}
 
-  h1 {
-    margin-bottom: 5px;
-  }
+/* LEFT */
+.left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
 
-  .stats {
-    text-align: center;
-    font-size: 18px;
-    opacity: 0.9;
-  }
+.stats {
+  text-align: center;
+  font-size: 18px;
+  opacity: 0.9;
+}
 
-  .clicker-wrapper {
-    position: relative;
-  }
+.clicker-wrapper {
+  position: relative;
+}
 
-  .clicker {
-    width: 260px;
-    cursor: pointer;
-    transition: transform 0.1s, filter 0.2s;
-  }
+.clicker {
+  width: 260px;
+  cursor: pointer;
+  transition: transform 0.1s, filter 0.2s;
+}
 
-  .clicker:active {
-    transform: scale(0.92);
-  }
+.clicker:active {
+  transform: scale(0.92);
+}
 
-  .floating {
-    position: absolute;
-    color: #ffd700;
-    font-weight: bold;
-    animation: floatUp 1s forwards;
-    pointer-events: none;
-  }
+.floating {
+  position: absolute;
+  color: gold;
+  font-weight: bold;
+  animation: floatUp 1s forwards;
+  pointer-events: none;
+}
 
-  @keyframes floatUp {
-    0% { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-50px); }
-  }
+@keyframes floatUp {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-50px); }
+}
 
-  /* RIGHT SIDE */
-  .right {
-    width: 380px;
-    background: rgba(255,255,255,0.95);
-    color: #222;
-    padding: 20px;
-    overflow-y: auto;
-  }
+/* RIGHT */
+.right {
+  width: 400px;
+  background: rgba(255,255,255,0.95);
+  color: #222;
+  padding: 20px;
+  overflow-y: auto;
+}
 
-  .right h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
+.right h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-  .upgrade {
-    background: white;
-    border-radius: 15px;
-    padding: 15px;
-    margin-bottom: 15px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    text-align: center;
-    transition: transform 0.15s;
-  }
+.upgrade {
+  background: white;
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 18px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  transition: transform 0.15s;
+}
 
-  .upgrade:hover {
-    transform: translateY(-4px);
-  }
+.upgrade:hover {
+  transform: translateY(-4px);
+}
 
-  .upgrade img {
-    width: 80px;
-    margin-bottom: 8px;
-  }
+.upgrade.equipped {
+  outline: 3px solid gold;
+}
 
-  .upgrade h3 {
-    margin: 5px 0;
-  }
+.upgrade img.main {
+  width: 80px;
+}
 
-  .buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
+.mini-icons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 6px;
+}
 
-  button {
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-  }
+.mini-icons img {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  transition: transform 0.1s;
+}
 
-  .buy {
-    background: #4CAF50;
-    color: white;
-  }
+.mini-icons img:hover {
+  transform: scale(1.2);
+}
 
-  .buy:disabled {
-    background: #aaa;
-    cursor: not-allowed;
-  }
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
 
-  .equip {
-    background: #2196F3;
-    color: white;
-  }
+button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
 
-  .equipped {
-    outline: 3px solid gold;
-  }
+.buy {
+  background: #4CAF50;
+  color: white;
+}
+
+.buy:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+.equip {
+  background: #2196F3;
+  color: white;
+}
 </style>
 </head>
 
 <body>
 
+<div class="header">🔥 My Clicker Game</div>
+
 <div class="container">
 
   <!-- LEFT -->
   <div class="left">
-    <h1>My Clicker Game</h1>
-
     <div class="stats">
       Clicks: <span id="clicks">0</span><br>
       CPS: <span id="cps">0</span>
@@ -193,7 +214,7 @@ function getCPS() {
   return upgrades.reduce((sum,u)=>sum+u.count*u.cps,0);
 }
 
-clicker.onclick = (e) => {
+clicker.onclick = () => {
   clicks++;
   spawnFloat("+1");
   updateUI();
@@ -225,14 +246,28 @@ function equip(i) {
 
 function renderUpgrades() {
   upgradesDiv.innerHTML = "";
+
   upgrades.forEach((u,i)=>{
     const div = document.createElement("div");
     div.className = "upgrade" + (equippedClicker === u.img ? " equipped" : "");
+
+    // Mini icons (max 8 shown)
+    let iconsHTML = "";
+    const maxIcons = 8;
+    const shown = Math.min(u.count, maxIcons);
+    for (let j=0;j<shown;j++) {
+      iconsHTML += `<img src="${u.img}">`;
+    }
+    if (u.count > maxIcons) {
+      iconsHTML += `<span>+${u.count - maxIcons}</span>`;
+    }
+
     div.innerHTML = `
-      <img src="${u.img}">
+      <img src="${u.img}" class="main">
       <h3>${u.name}</h3>
       <p>+${u.cps} CPS</p>
       <p>Owned: ${u.count}</p>
+      <div class="mini-icons">${iconsHTML}</div>
       <div class="buttons">
         <button class="buy" onclick="buy(${i})" ${clicks < u.cost ? "disabled" : ""}>
           Buy (${format(u.cost)})
@@ -260,4 +295,3 @@ updateUI();
 
 </body>
 </html>
-
