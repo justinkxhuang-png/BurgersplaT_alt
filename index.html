@@ -1,175 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Clicker Game</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-    }
+<meta charset="UTF-8">
+<title>Clicker Game</title>
 
-    .container {
-      display: flex;
-      height: 100vh;
-    }
+<style>
+  * {
+    box-sizing: border-box;
+  }
 
-    /* LEFT SIDE */
-    .left {
-      flex: 1;
-      text-align: center;
-      padding-top: 40px;
-    }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #1d2671, #c33764);
+    color: white;
+  }
 
-    .clicker {
-      width: 220px;
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
+  .container {
+    display: flex;
+    height: 100vh;
+  }
 
-    .clicker:active {
-      transform: scale(0.95);
-    }
+  /* LEFT SIDE */
+  .left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
 
-    .stats {
-      font-size: 20px;
-      margin-bottom: 20px;
-    }
+  h1 {
+    margin-bottom: 5px;
+  }
 
-    /* RIGHT SIDE (UPGRADES) */
-    .right {
-      width: 350px;
-      background: #ffffff;
-      padding: 20px;
-      overflow-y: auto;
-      box-shadow: -3px 0 10px rgba(0,0,0,0.2);
-    }
+  .stats {
+    text-align: center;
+    font-size: 18px;
+    opacity: 0.9;
+  }
 
-    .upgrade {
-      border-bottom: 1px solid #ddd;
-      padding: 15px 0;
-      text-align: center;
-    }
+  .clicker-wrapper {
+    position: relative;
+  }
 
-    .upgrade img {
-      width: 70px;
-      cursor: pointer;
-    }
+  .clicker {
+    width: 260px;
+    cursor: pointer;
+    transition: transform 0.1s, filter 0.2s;
+  }
 
-    button {
-      margin-top: 8px;
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-  </style>
+  .clicker:active {
+    transform: scale(0.92);
+  }
+
+  .floating {
+    position: absolute;
+    color: #ffd700;
+    font-weight: bold;
+    animation: floatUp 1s forwards;
+    pointer-events: none;
+  }
+
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-50px); }
+  }
+
+  /* RIGHT SIDE */
+  .right {
+    width: 380px;
+    background: rgba(255,255,255,0.95);
+    color: #222;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .right h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .upgrade {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    text-align: center;
+    transition: transform 0.15s;
+  }
+
+  .upgrade:hover {
+    transform: translateY(-4px);
+  }
+
+  .upgrade img {
+    width: 80px;
+    margin-bottom: 8px;
+  }
+
+  .upgrade h3 {
+    margin: 5px 0;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  button {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .buy {
+    background: #4CAF50;
+    color: white;
+  }
+
+  .buy:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+  }
+
+  .equip {
+    background: #2196F3;
+    color: white;
+  }
+
+  .equipped {
+    outline: 3px solid gold;
+  }
+</style>
 </head>
+
 <body>
 
 <div class="container">
 
-  <!-- LEFT SIDE -->
+  <!-- LEFT -->
   <div class="left">
     <h1>My Clicker Game</h1>
+
     <div class="stats">
       Clicks: <span id="clicks">0</span><br>
-      Per Second: <span id="cps">0</span>
+      CPS: <span id="cps">0</span>
     </div>
 
-    <img src="YIcheng_4.png" class="clicker" id="mainClicker" alt="Main Clicker">
+    <div class="clicker-wrapper" id="clickerWrapper">
+      <img id="mainClicker" class="clicker" src="YIcheng_4.png">
+    </div>
   </div>
 
-  <!-- RIGHT SIDE -->
+  <!-- RIGHT -->
   <div class="right">
     <h2>Upgrades</h2>
-
-    <div class="upgrade">
-      <h3>Failure</h3>
-      <img src="Yicheng_2.png">
-      <p>+1 CPS</p>
-      <button onclick="buy(0)">Cost: <span id="cost0">50</span></button>
-      <p>Owned: <span id="count0">0</span></p>
-    </div>
-
-    <div class="upgrade">
-      <h3>Forehead</h3>
-      <img src="Wenyao_2.png">
-      <p>+10 CPS</p>
-      <button onclick="buy(1)">Cost: <span id="cost1">500</span></button>
-      <p>Owned: <span id="count1">0</span></p>
-    </div>
-
-    <div class="upgrade">
-      <h3>Grade 3 Pianist</h3>
-      <img src="Wenyao.png">
-      <p>+50 CPS</p>
-      <button onclick="buy(2)">Cost: <span id="cost2">2500</span></button>
-      <p>Owned: <span id="count2">0</span></p>
-    </div>
-
-    <div class="upgrade">
-      <h3>Entrepreneur</h3>
-      <img src="Yicheng_3.png">
-      <p>+250 CPS</p>
-      <button onclick="buy(3)">Cost: <span id="cost3">10000</span></button>
-      <p>Owned: <span id="count3">0</span></p>
-    </div>
-
-    <div class="upgrade">
-      <h3>Ascended to Heaven</h3>
-      <img src="Yicheng.png">
-      <p>+999 CPS</p>
-      <button onclick="buy(4)">Cost: <span id="cost4">50000</span></button>
-      <p>Owned: <span id="count4">0</span></p>
-    </div>
+    <div id="upgrades"></div>
   </div>
 
 </div>
 
 <script>
-  let clicks = 0;
+let clicks = 0;
+let equippedClicker = "YIcheng_4.png";
 
-  const upgrades = [
-    { count: 0, cost: 50, cps: 1, scale: 1.3 },
-    { count: 0, cost: 500, cps: 10, scale: 1.35 },
-    { count: 0, cost: 2500, cps: 50, scale: 1.4 },
-    { count: 0, cost: 10000, cps: 250, scale: 1.45 },
-    { count: 0, cost: 50000, cps: 999, scale: 1.5 }
-  ];
+const upgrades = [
+  { name:"Failure", cps:1, cost:50, scale:1.3, count:0, img:"Yicheng_2.png" },
+  { name:"Forehead", cps:10, cost:500, scale:1.35, count:0, img:"Wenyao_2.png" },
+  { name:"Grade 3 Pianist", cps:50, cost:2500, scale:1.4, count:0, img:"Wenyao.png" },
+  { name:"Entrepreneur", cps:250, cost:10000, scale:1.45, count:0, img:"Yicheng_3.png" },
+  { name:"Ascended to Heaven", cps:999, cost:50000, scale:1.5, count:0, img:"Yicheng.png" }
+];
 
-  document.getElementById("mainClicker").onclick = () => {
-    clicks++;
+const upgradesDiv = document.getElementById("upgrades");
+const clicker = document.getElementById("mainClicker");
+
+function format(n) {
+  if (n >= 1e9) return (n/1e9).toFixed(2) + "B";
+  if (n >= 1e6) return (n/1e6).toFixed(2) + "M";
+  if (n >= 1e3) return (n/1e3).toFixed(1) + "K";
+  return Math.floor(n);
+}
+
+function getCPS() {
+  return upgrades.reduce((sum,u)=>sum+u.count*u.cps,0);
+}
+
+clicker.onclick = (e) => {
+  clicks++;
+  spawnFloat("+1");
+  updateUI();
+};
+
+function spawnFloat(text) {
+  const span = document.createElement("span");
+  span.className = "floating";
+  span.textContent = text;
+  span.style.left = Math.random()*120 + "px";
+  document.getElementById("clickerWrapper").appendChild(span);
+  setTimeout(()=>span.remove(),1000);
+}
+
+function buy(i) {
+  if (clicks >= upgrades[i].cost) {
+    clicks -= upgrades[i].cost;
+    upgrades[i].count++;
+    upgrades[i].cost = Math.floor(upgrades[i].cost * upgrades[i].scale);
     updateUI();
-  };
-
-  function buy(i) {
-    if (clicks >= upgrades[i].cost) {
-      clicks -= upgrades[i].cost;
-      upgrades[i].count++;
-      upgrades[i].cost = Math.floor(upgrades[i].cost * upgrades[i].scale);
-      updateUI();
-    }
   }
+}
 
-  function getCPS() {
-    return upgrades.reduce((sum, u) => sum + u.count * u.cps, 0);
-  }
+function equip(i) {
+  equippedClicker = upgrades[i].img;
+  clicker.src = equippedClicker;
+  updateUI();
+}
 
-  setInterval(() => {
-    clicks += getCPS();
-    updateUI();
-  }, 1000);
+function renderUpgrades() {
+  upgradesDiv.innerHTML = "";
+  upgrades.forEach((u,i)=>{
+    const div = document.createElement("div");
+    div.className = "upgrade" + (equippedClicker === u.img ? " equipped" : "");
+    div.innerHTML = `
+      <img src="${u.img}">
+      <h3>${u.name}</h3>
+      <p>+${u.cps} CPS</p>
+      <p>Owned: ${u.count}</p>
+      <div class="buttons">
+        <button class="buy" onclick="buy(${i})" ${clicks < u.cost ? "disabled" : ""}>
+          Buy (${format(u.cost)})
+        </button>
+        ${u.count > 0 ? `<button class="equip" onclick="equip(${i})">Equip</button>` : ""}
+      </div>
+    `;
+    upgradesDiv.appendChild(div);
+  });
+}
 
-  function updateUI() {
-    document.getElementById("clicks").textContent = Math.floor(clicks);
-    document.getElementById("cps").textContent = getCPS().toFixed(1);
+function updateUI() {
+  document.getElementById("clicks").textContent = format(clicks);
+  document.getElementById("cps").textContent = format(getCPS());
+  renderUpgrades();
+}
 
-    upgrades.forEach((u, i) => {
-      document.getElementById("cost" + i).textContent = u.cost;
-      document.getElementById("count" + i).textContent = u.count;
-    });
-  }
+setInterval(()=>{
+  clicks += getCPS();
+  updateUI();
+},1000);
+
+updateUI();
 </script>
 
 </body>
 </html>
+
