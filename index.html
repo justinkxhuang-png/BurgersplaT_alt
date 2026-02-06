@@ -39,10 +39,10 @@ body{
 #left{font-size:24px;text-align:center;}
 #achievementsList div{
  margin-top:6px;
- color:gold;
  font-weight:800;
 }
-
+.locked-achievement{color:grey;}
+.unlocked-achievement{color:limegreen;}
 /* TABS */
 .tabs button{
  width:33.33%;
@@ -60,7 +60,7 @@ body{
 }
 
 /* CONTENT */
-#sword,#skin{
+#swordDiv,#skinDiv{
  max-height:calc(100vh - 260px);
  overflow-y:auto;
 }
@@ -120,6 +120,7 @@ body{
  font-weight:800;
  pointer-events:none;
  animation:float 0.9s forwards;
+ color: #35e3ff;
 }
 @keyframes float{
  to{transform:translateY(-60px);opacity:0;}
@@ -163,13 +164,10 @@ body{
 <div id="top">
  <div>TOTAL DAMAGE: <span id="total">0</span></div>
  <div>DAMAGE / CLICK: <span id="dpc">1</span></div>
- <div>COINS: <span id="coins">0</span></div>
- <div>COMBO: <span id="combo">x1.00</span></div>
 </div>
 
 <div id="game">
  <div id="left">
-  COMBO<br><b id="comboLeft">x1.00</b><br><br>
   ACHIEVEMENTS:<div id="achievementsList"></div>
  </div>
 
@@ -219,15 +217,14 @@ const skins=[
 const achievements=[
  {n:"SAVAGE",c:()=>total>=10000},
  {n:"RELENTLESS",c:()=>total>=100000},
- {n:"MASSACRE",c:()=>total>=1000000},
+ {n:"MASACRE",c:()=>total>=1000000},
  {n:"THE STRONGEST",c:()=>total>=10000000},
  {n:"???",c:()=>total>=100000000,unlock:"THE END???"}
 ];
 
 /* STATE */
 let saveData=JSON.parse(localStorage.getItem("save"))||{};
-let coins=saveData.coins||0,total=saveData.total||0;
-let combo=0,timer=0;
+let total=saveData.total||0;
 let sword=swords[0],skin=skins[0];
 let unlockedSwords=saveData.us||["Wooden Sword"];
 let unlockedSkins=saveData.uk||["Default"];
@@ -236,19 +233,16 @@ let unlockedTitles=saveData.ut||[];
 /* ELEMENTS */
 const totalEl=document.getElementById("total");
 const dpcEl=document.getElementById("dpc");
-const coinsEl=document.getElementById("coins");
 const swordDiv=document.getElementById("swordDiv");
 const skinDiv=document.getElementById("skinDiv");
 const character=document.getElementById("character");
+const achievementsList=document.getElementById("achievementsList");
 
 /* CLICK */
 character.onclick=e=>{
- combo++; timer=120;
- let mult=1+combo/100;
- let dmg=Math.floor((sword.d+(skin.d||0))*mult);
- coins+=dmg; total+=dmg;
+ let dmg=Math.floor(sword.d+(skin.d||0));
+ total+=dmg;
  float(e.clientX,e.clientY,"+"+dmg);
- float(e.clientX+20,e.clientY-10,"x"+mult.toFixed(2));
  move(); update(); checkAchievements();
 };
 
@@ -267,44 +261,34 @@ function float(x,y,t){
  setTimeout(()=>d.remove(),900);
 }
 
-setInterval(()=>{
- timer--;
- if(timer<=0) combo=0;
- comboText();
-},50);
-
-function comboText(){
- document.getElementById("combo").textContent="x"+(1+combo/100).toFixed(2);
- document.getElementById("comboLeft").textContent="x"+(1+combo/100).toFixed(2);
-}
-
 /* ACHIEVEMENTS */
 function achievementPopup(name){
  let p=document.getElementById("achievementPopup");
  p.textContent="🏆 ACHIEVEMENT UNLOCKED: "+name;
  p.classList.add("show");
  setTimeout(()=>p.classList.remove("show"),2500);
+
+ // Set achievement color in list to green
+ document.querySelector(`#achievementsList div[data-name="${name}"]`).classList.remove("locked-achievement");
+ document.querySelector(`#achievementsList div[data-name="${name}"]`).classList.add("unlocked-achievement");
 }
 
 function checkAchievements(){
  achievements.forEach(a=>{
-  if(a.c()&&!unlockedTitles.includes(a.n)){
-   unlockedTitles.push(a.n);
-   achievementPopup(a.n);
-
-   // Show in left panel
-   const list=document.getElementById("achievementsList");
-   const div=document.createElement("div");
-   div.textContent=a.n;
-   list.appendChild(div);
-
-   if(a.unlock){
-    unlockedTitles.push(a.unlock);
-    achievementPopup(a.unlock);
-    const div2=document.createElement("div");
-    div2.textContent=a.unlock;
-    list.appendChild(div2);
-   }
+  if(!document.querySelector(`#achievementsList div[data-name="${a.n}"]`)){
+    const div=document.createElement("div");
+    div.textContent=a.n;
+    div.dataset.name=a.n;
+    div.className = unlockedTitles.includes(a.n) ? "unlocked-achievement" : "locked-achievement";
+    achievementsList.appendChild(div);
+  }
+  if(a.c() && !unlockedTitles.includes(a.n)){
+    unlockedTitles.push(a.n);
+    achievementPopup(a.n);
+    if(a.unlock){
+      unlockedTitles.push(a.unlock);
+      achievementPopup(a.unlock);
+    }
   }
  });
 }
@@ -320,8 +304,8 @@ function build(){
    <div>
     <b>${sw.secret&&!owned?"???":sw.n}</b><br>
     DMG: ${sw.secret&&!owned?"???":sw.d}<br>
-    Cost: ${sw.p}
-    <button ${!owned&&coins<sw.p?'class="locked"':''}
+    Cost: ${sw.p} DAMAGE
+    <button ${!owned&&total<sw.p?'class="locked"':''}
      onclick="buySword('${sw.n}')">${owned?"Equip":"Buy"}</button>
    </div>
   </div>`;
@@ -336,8 +320,8 @@ function build(){
    <div>
     <b>${sk.secret&&!owned?"???":sk.n}</b><br>
     DMG/CPS: ${sk.secret&&!owned?"???":(sk.cps||sk.d)}<br>
-    Cost: ${sk.p}
-    <button ${!owned&&coins<sk.p?'class="locked"':''}
+    Cost: ${sk.p} DAMAGE
+    <button ${!owned&&total<sk.p?'class="locked"':''}
      onclick="buySkin('${sk.n}')">${owned?"Equip":"Buy"}</button>
    </div>
   </div>`;
@@ -348,13 +332,13 @@ function build(){
 function buySword(n){
  let sw=swords.find(x=>x.n===n);
  if(unlockedSwords.includes(n)){sword=sw;cursor.src=sw.img;return;}
- if(coins>=sw.p){coins-=sw.p;unlockedSwords.push(n);sword=sw;cursor.src=sw.img;build();}
+ if(total>=sw.p){unlockedSwords.push(n);sword=sw;cursor.src=sw.img;build();}
 }
 
 function buySkin(n){
  let sk=skins.find(x=>x.n===n);
  if(unlockedSkins.includes(n)){skin=sk;character.src=sk.img;return;}
- if(coins>=sk.p){coins-=sk.p;unlockedSkins.push(n);skin=sk;character.src=sk.img;build();}
+ if(total>=sk.p){unlockedSkins.push(n);skin=sk;character.src=sk.img;build();}
 }
 
 /* TABS */
@@ -370,13 +354,12 @@ function tab(id,b){
 function update(){
  totalEl.textContent=total;
  dpcEl.textContent=sword.d+(skin.d||0);
- coinsEl.textContent=coins;
 }
 
 /* SAVE */
 function save(){
  localStorage.setItem("save",JSON.stringify({
-  coins,total,us:unlockedSwords,uk:unlockedSkins,ut:unlockedTitles
+  total,us:unlockedSwords,uk:unlockedSkins,ut:unlockedTitles
  }));
  alert("Saved!");
 }
@@ -389,7 +372,7 @@ document.addEventListener("mousemove",e=>{
 });
 
 /* INITIALIZE */
-build(); move(); update();
+build(); update(); checkAchievements();
 </script>
 
 </body>
