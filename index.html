@@ -2,289 +2,220 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Clicker Combat</title>
+<title>Yicheng Clicker</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
-body{
- margin:0;
- background:radial-gradient(circle at top,#0b1a2f,#04070e);
- font-family:"Orbitron",sans-serif;
- color:#e6f1ff;
- overflow:hidden;
- cursor:none;
+body {
+  margin: 0;
+  font-family: 'Press Start 2P', monospace;
+  background: #0b0f1a;
+  color: white;
+  overflow: hidden;
 }
 
-/* TOP HUD */
-#top{
- padding:18px;
- text-align:center;
- background:linear-gradient(90deg,#071b2f,#02060c);
- box-shadow:0 0 30px #000;
-}
-#top div{
- font-size:36px;
- margin:8px 0;
- color:#35e3ff;
- font-weight:800;
+:root {
+  --common: #7fdcff;
+  --rare: gold;
+  --epic: purple;
+  --mythic: red;
+  --legendary: hotpink;
 }
 
-/* LAYOUT */
-#game{display:flex;height:calc(100vh - 160px);}
-#left,#right{width:320px;background:#0d1626;padding:14px;}
-#center{flex:1;position:relative;}
-
-/* LEFT */
-#left{font-size:26px;text-align:center;}
-
-/* TABS */
-.tabs button{
- width:33.33%;
- padding:18px;
- font-size:18px;
- background:#0f2238;
- border:none;
- color:white;
- cursor:pointer;
-}
-.tabs button.active{
- background:#35e3ff;
- color:black;
- font-weight:800;
+button {
+  font-family: inherit;
+  cursor: pointer;
 }
 
-/* CONTENT AREAS */
-#sword,#skin{
- max-height:calc(100vh - 260px);
- overflow-y:auto;
+.locked {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
-/* ITEMS */
-.item{
- display:flex;
- gap:12px;
- background:#091728;
- margin-bottom:14px;
- padding:12px;
- border-left:8px solid;
-}
-.item img{
- width:72px;height:72px;object-fit:cover;
-}
-.item button{
- margin-top:6px;
- width:100%;
- padding:6px;
- font-family:inherit;
- cursor:pointer;
+.rainbow {
+  background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
-/* RARITIES */
-.common{border-color:#35e3ff;}
-.rare{border-color:gold;}
-.epic{border-color:purple;}
-.mythic{border-color:red;}
-.legendary{border-color:hotpink;}
-.secret{
- border-color:transparent;
- background:
-  linear-gradient(#091728,#091728) padding-box,
-  linear-gradient(90deg,red,orange,yellow,green,cyan,blue,violet) border-box;
- border-left:8px solid transparent;
- animation:rainbow 2s linear infinite;
-}
-@keyframes rainbow{to{filter:hue-rotate(360deg);}}
-
-/* CHARACTER */
-#character{
- position:absolute;
- width:180px;
- cursor:pointer;
+#topLeft {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 22px;
 }
 
-/* FLOAT */
-.float{
- position:absolute;
- font-size:36px;
- font-weight:800;
- pointer-events:none;
- animation:float 0.9s forwards;
-}
-@keyframes float{
- to{transform:translateY(-60px);opacity:0;}
+#comboLeft {
+  position: absolute;
+  left: 10px;
+  top: 70px;
+  font-size: 42px;
+  color: cyan;
 }
 
-/* CURSOR */
-#cursor{
- position:fixed;
- pointer-events:none;
- width:48px;height:48px;
- transform:translate(-50%,-50%);
+#statsTop {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  text-align: right;
+  font-size: 24px;
+}
+
+#character {
+  position: absolute;
+  width: 180px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+#comboPopup {
+  position: absolute;
+  font-size: 36px;
+  pointer-events: none;
+  color: yellow;
+  animation: pop 0.6s ease-out forwards;
+}
+
+@keyframes pop {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.6); }
+}
+
+#tabs {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+}
+
+.tab {
+  flex: 1;
+  padding: 20px;
+  text-align: center;
+  background: #111;
+  border: 2px solid #333;
+}
+
+.tab.active {
+  background: #7fdcff;
+  color: black;
+}
+
+.panel {
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: #111;
+  overflow-y: auto;
+  display: none;
+}
+
+.panel.active {
+  display: block;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  border: 3px solid white;
+  margin: 10px;
+  padding: 10px;
+}
+
+.item img {
+  width: 80px;
+  height: 80px;
+  margin-right: 20px;
+}
+
+.item button {
+  margin-left: auto;
 }
 </style>
 </head>
 
 <body>
 
-<div id="top">
- <div>TOTAL DAMAGE: <span id="total">0</span></div>
- <div>DAMAGE / CLICK: <span id="dpc">1</span></div>
- <div>COMBO: <span id="combo">x1.00</span></div>
+<div id="topLeft">TITLE: NONE</div>
+<div id="comboLeft">COMBO: x1</div>
+
+<div id="statsTop">
+  <div id="totalDamage">TOTAL DMG: 0</div>
+  <div id="dpc">DMG/CLICK: 1</div>
 </div>
 
-<div id="game">
- <div id="left">
-  COMBO<br><b id="comboLeft">x1.00</b>
- </div>
+<img id="character" src="YIcheng_4.png">
 
- <div id="center">
-  <img id="character" src="YIcheng_4.png">
- </div>
+<div id="swordPanel" class="panel active"></div>
+<div id="skinPanel" class="panel"></div>
+<div id="achPanel" class="panel"></div>
 
- <div id="right">
-  <div class="tabs">
-   <button onclick="tab('sword',this)" class="active">SWORD</button>
-   <button onclick="tab('skin',this)">SKIN</button>
-   <button onclick="save()">SAVE</button>
-  </div>
-
-  <div id="sword"></div>
-  <div id="skin" style="display:none"></div>
- </div>
+<div id="tabs">
+  <div class="tab active" onclick="openTab('sword')">SWORD</div>
+  <div class="tab" onclick="openTab('skin')">SKIN</div>
+  <div class="tab" onclick="openTab('ach')">ACHIEVEMENTS</div>
 </div>
-
-<img id="cursor" src="Wood.webp">
 
 <script>
-/* DATA */
-const swords=[
- {n:"Wooden Sword",d:1,p:0,r:"common",img:"Wood.webp"},
- {n:"Iron Sword",d:10,p:300,r:"rare",img:"Iron.webp"},
- {n:"Gold Sword",d:35,p:900,r:"epic",img:"Gold.png"},
- {n:"Diamond Sword",d:70,p:4000,r:"mythic",img:"Diamond.webp"},
- {n:"Amethyst Sword",d:150,p:10000,r:"legendary",img:"Amethyst.webp"},
- {n:"Tungsten Sword",d:400,p:40000,r:"legendary",img:"Tungsten.webp"},
- {n:"???",d:999,p:100000,r:"secret",secret:true,img:"Yicheng_6.png"}
-];
-
-const skins=[
- {n:"Default",img:"YIcheng_4.png",p:0,d:1,r:"common"},
- {n:"Failure",img:"Yicheng_2.png",p:100,d:1,r:"common"},
- {n:"Forehead",img:"Wenyao_2.png",p:500,d:10,r:"common"},
- {n:"Grade 3 Pianist",img:"Wenyao.png",p:2500,d:50,r:"rare"},
- {n:"Entrepreneur",img:"Yicheng_3.png",p:10000,d:250,r:"mythic"},
- {n:"The Thinker",img:"Yicheng_5.png",p:50000,cps:999,r:"mythic"},
- {n:"Ascended to Heaven",img:"Yicheng_5.png",p:150000,cps:1500,r:"legendary"},
- {n:"???",img:"Ben.png",p:500000,r:"secret",secret:true},
- {n:"???",img:"Amare.png",p:1000000,r:"secret",secret:true}
-];
-
-/* STATE */
-let coins=0,total=0,combo=0,timer=0;
-let sword=swords[0],skin=skins[0];
-const char=document.getElementById("character");
-
-/* CLICK */
-char.onclick=e=>{
- combo++; timer=100;
- let mult=1+combo/100;
- let dmg=Math.floor((skin.d||0 + sword.d)*mult);
- coins+=dmg; total+=dmg;
- float(e.clientX,e.clientY,"+"+dmg);
- float(e.clientX+20,e.clientY-10,"x"+mult.toFixed(2));
- move();
- update();
+/* ================= CORE STATE ================= */
+let state = JSON.parse(localStorage.getItem("save")) || {
+  totalDamage: 0,
+  combo: 1,
+  dmgClick: 1,
+  sword: "Wooden",
+  skin: "Default",
+  unlockedSwords: ["Wooden"],
+  unlockedSkins: ["Default"],
+  achievements: [],
+  title: "NONE"
 };
 
-function move(){
- char.style.left=Math.random()*75+"%";
- char.style.top=Math.random()*65+"%";
+let lastClick = 0;
+
+/* ================= UI ================= */
+const character = document.getElementById("character");
+
+function updateUI() {
+  document.getElementById("totalDamage").textContent = "TOTAL DMG: " + state.totalDamage;
+  document.getElementById("dpc").textContent = "DMG/CLICK: " + state.dmgClick;
+  document.getElementById("comboLeft").textContent = "COMBO: x" + state.combo;
+  document.getElementById("topLeft").textContent = "TITLE: " + state.title;
+  localStorage.setItem("save", JSON.stringify(state));
 }
 
-function float(x,y,t){
- let d=document.createElement("div");
- d.className="float";
- d.style.left=x+"px"; d.style.top=y+"px";
- d.textContent=t;
- document.body.appendChild(d);
- setTimeout(()=>d.remove(),900);
+/* ================= CLICK ================= */
+character.onclick = (e) => {
+  const now = Date.now();
+  state.combo = (now - lastClick < 800) ? state.combo + 1 : 1;
+  lastClick = now;
+
+  let dmg = Math.floor(state.dmgClick * (1 + state.combo * 0.01));
+  state.totalDamage += dmg;
+
+  popup(e.clientX, e.clientY, "x" + state.combo);
+  moveCharacter();
+  updateUI();
+};
+
+function popup(x,y,text){
+  const p = document.createElement("div");
+  p.id="comboPopup";
+  p.textContent=text;
+  p.style.left=x+"px";
+  p.style.top=y+"px";
+  document.body.appendChild(p);
+  setTimeout(()=>p.remove(),600);
 }
 
-/* LOOP */
-setInterval(()=>{
- timer--;
- if(timer<=0) combo=0;
- document.getElementById("combo").textContent="x"+(1+combo/100).toFixed(2);
- document.getElementById("comboLeft").textContent="x"+(1+combo/100).toFixed(2);
-},50);
-
-/* BUILD */
-function build(){
- let s=document.getElementById("sword"); s.innerHTML="";
- swords.forEach(sw=>{
-  s.innerHTML+=`
-  <div class="item ${sw.r}">
-   <img src="${sw.img}">
-   <div><b>${sw.secret?"???":sw.n}</b><br>
-   DMG: ${sw.secret?"???":sw.d}<br>
-   Cost: ${sw.p}<button onclick="equipSword('${sw.n}')">Equip</button>
-   </div>
-  </div>`;
- });
-
- let k=document.getElementById("skin"); k.innerHTML="";
- skins.forEach(sk=>{
-  k.innerHTML+=`
-  <div class="item ${sk.r}">
-   <img src="${sk.img}" style="${sk.secret?'filter:brightness(0);':''}">
-   <div><b>${sk.secret?"???":sk.n}</b><br>
-   DMG/CPS: ${sk.secret?"???":(sk.cps||sk.d)}<br>
-   Cost: ${sk.p}<button onclick="equipSkin('${sk.n}')">Equip</button>
-   </div>
-  </div>`;
- });
+function moveCharacter(){
+  character.style.left = Math.random()*(window.innerWidth-200)+"px";
+  character.style.top = Math.random()*(window.innerHeight-300)+"px";
 }
 
-function equipSword(n){
- let sw=swords.find(x=>x.n===n);
- if(sw&&coins>=sw.p){
-  sword=sw;
-  document.getElementById("cursor").src=sw.img;
- }
-}
-
-function equipSkin(n){
- let sk=skins.find(x=>x.n===n);
- if(sk&&coins>=sk.p){
-  skin=sk;
-  char.src=sk.img;
- }
-}
-
-function tab(id,b){
- ["sword","skin"].forEach(x=>document.getElementById(x).style.display="none");
- document.getElementById(id).style.display="block";
- document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
- b.classList.add("active");
-}
-
-function update(){
- document.getElementById("total").textContent=total;
- document.getElementById("dpc").textContent=sword.d+(skin.d||0);
-}
-
-function save(){
- localStorage.setItem("save",JSON.stringify({total}));
- alert("Saved!");
-}
-
-document.addEventListener("mousemove",e=>{
- let c=document.getElementById("cursor");
- c.style.left=e.clientX+"px"; c.style.top=e.clientY+"px";
-});
-
-build(); move(); update();
+updateUI();
 </script>
 
 </body>
