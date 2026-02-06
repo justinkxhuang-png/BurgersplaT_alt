@@ -32,11 +32,16 @@ body{
 
 /* LAYOUT */
 #game{display:flex;height:calc(100vh - 160px);}
-#left,#right{width:320px;background:#0d1626;padding:14px;}
+#left,#right{width:320px;background:#0d1626;padding:14px;overflow-y:auto;}
 #center{flex:1;position:relative;}
 
 /* LEFT */
-#left{font-size:32px;text-align:center;}
+#left{font-size:24px;text-align:center;}
+#achievementsList div{
+ margin-top:6px;
+ color:gold;
+ font-weight:800;
+}
 
 /* TABS */
 .tabs button{
@@ -105,6 +110,7 @@ body{
  position:absolute;
  width:180px;
  cursor:pointer;
+ transition: left 0.2s ease, top 0.2s ease;
 }
 
 /* FLOAT */
@@ -157,12 +163,14 @@ body{
 <div id="top">
  <div>TOTAL DAMAGE: <span id="total">0</span></div>
  <div>DAMAGE / CLICK: <span id="dpc">1</span></div>
+ <div>COINS: <span id="coins">0</span></div>
  <div>COMBO: <span id="combo">x1.00</span></div>
 </div>
 
 <div id="game">
  <div id="left">
-  COMBO<br><b id="comboLeft">x1.00</b>
+  COMBO<br><b id="comboLeft">x1.00</b><br><br>
+  ACHIEVEMENTS:<div id="achievementsList"></div>
  </div>
 
  <div id="center">
@@ -171,13 +179,13 @@ body{
 
  <div id="right">
   <div class="tabs">
-   <button onclick="tab('sword',this)" class="active">SWORD</button>
-   <button onclick="tab('skin',this)">SKIN</button>
+   <button onclick="tab('swordDiv',this)" class="active">SWORD</button>
+   <button onclick="tab('skinDiv',this)">SKIN</button>
    <button onclick="save()">SAVE</button>
   </div>
 
-  <div id="sword"></div>
-  <div id="skin" style="display:none"></div>
+  <div id="swordDiv"></div>
+  <div id="skinDiv" style="display:none"></div>
  </div>
 </div>
 
@@ -211,7 +219,7 @@ const skins=[
 const achievements=[
  {n:"SAVAGE",c:()=>total>=10000},
  {n:"RELENTLESS",c:()=>total>=100000},
- {n:"MASACRE",c:()=>total>=1000000},
+ {n:"MASSACRE",c:()=>total>=1000000},
  {n:"THE STRONGEST",c:()=>total>=10000000},
  {n:"???",c:()=>total>=100000000,unlock:"THE END???"}
 ];
@@ -224,6 +232,14 @@ let sword=swords[0],skin=skins[0];
 let unlockedSwords=saveData.us||["Wooden Sword"];
 let unlockedSkins=saveData.uk||["Default"];
 let unlockedTitles=saveData.ut||[];
+
+/* ELEMENTS */
+const totalEl=document.getElementById("total");
+const dpcEl=document.getElementById("dpc");
+const coinsEl=document.getElementById("coins");
+const swordDiv=document.getElementById("swordDiv");
+const skinDiv=document.getElementById("skinDiv");
+const character=document.getElementById("character");
 
 /* CLICK */
 character.onclick=e=>{
@@ -242,6 +258,7 @@ function move(){
 }
 
 function float(x,y,t){
+ if(document.querySelectorAll(".float").length>20) return;
  let d=document.createElement("div");
  d.className="float";
  d.style.left=x+"px"; d.style.top=y+"px";
@@ -274,20 +291,30 @@ function checkAchievements(){
   if(a.c()&&!unlockedTitles.includes(a.n)){
    unlockedTitles.push(a.n);
    achievementPopup(a.n);
+
+   // Show in left panel
+   const list=document.getElementById("achievementsList");
+   const div=document.createElement("div");
+   div.textContent=a.n;
+   list.appendChild(div);
+
    if(a.unlock){
     unlockedTitles.push(a.unlock);
     achievementPopup(a.unlock);
+    const div2=document.createElement("div");
+    div2.textContent=a.unlock;
+    list.appendChild(div2);
    }
   }
  });
 }
 
-/* BUILD */
+/* BUILD SHOP */
 function build(){
- let s=document.getElementById("sword"); s.innerHTML="";
+ swordDiv.innerHTML="";
  swords.forEach(sw=>{
   let owned=unlockedSwords.includes(sw.n);
-  s.innerHTML+=`
+  swordDiv.innerHTML+=`
   <div class="item ${sw.r}">
    <img src="${sw.img}" style="${sw.secret&&!owned?'filter:brightness(0);':''}">
    <div>
@@ -300,10 +327,10 @@ function build(){
   </div>`;
  });
 
- let k=document.getElementById("skin"); k.innerHTML="";
+ skinDiv.innerHTML="";
  skins.forEach(sk=>{
   let owned=unlockedSkins.includes(sk.n);
-  k.innerHTML+=`
+  skinDiv.innerHTML+=`
   <div class="item ${sk.r}">
    <img src="${sk.img}" style="${sk.secret&&!owned?'filter:brightness(0);':''}">
    <div>
@@ -317,30 +344,36 @@ function build(){
  });
 }
 
+/* BUY ITEMS */
 function buySword(n){
  let sw=swords.find(x=>x.n===n);
  if(unlockedSwords.includes(n)){sword=sw;cursor.src=sw.img;return;}
  if(coins>=sw.p){coins-=sw.p;unlockedSwords.push(n);sword=sw;cursor.src=sw.img;build();}
 }
+
 function buySkin(n){
  let sk=skins.find(x=>x.n===n);
  if(unlockedSkins.includes(n)){skin=sk;character.src=sk.img;return;}
  if(coins>=sk.p){coins-=sk.p;unlockedSkins.push(n);skin=sk;character.src=sk.img;build();}
 }
 
+/* TABS */
 function tab(id,b){
- sword.style.display="none";
- skin.style.display="none";
+ swordDiv.style.display="none";
+ skinDiv.style.display="none";
  document.getElementById(id).style.display="block";
  document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
  b.classList.add("active");
 }
 
+/* UPDATE HUD */
 function update(){
  totalEl.textContent=total;
- dpc.textContent=sword.d+(skin.d||0);
+ dpcEl.textContent=sword.d+(skin.d||0);
+ coinsEl.textContent=coins;
 }
 
+/* SAVE */
 function save(){
  localStorage.setItem("save",JSON.stringify({
   coins,total,us:unlockedSwords,uk:unlockedSkins,ut:unlockedTitles
@@ -348,13 +381,17 @@ function save(){
  alert("Saved!");
 }
 
+/* CUSTOM CURSOR */
+const cursor=document.getElementById("cursor");
 document.addEventListener("mousemove",e=>{
  cursor.style.left=e.clientX+"px";
  cursor.style.top=e.clientY+"px";
 });
 
+/* INITIALIZE */
 build(); move(); update();
 </script>
 
 </body>
 </html>
+
