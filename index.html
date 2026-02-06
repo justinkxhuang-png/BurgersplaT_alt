@@ -209,7 +209,7 @@ const skins=[
  {n:"Grade 3 Pianist",img:"Wenyao.png",p:2500,d:50,r:"rare"},
  {n:"Entrepreneur",img:"Yicheng_3.png",p:10000,d:250,r:"mythic"},
  {n:"The Thinker",img:"Yicheng_5.png",p:50000,cps:999,r:"mythic"},
- {n:"Ascended to Heaven",img:"Yicheng_5.png",p:150000,cps:1500,r:"legendary"},
+ {n:"Ascended to Heaven",img:"Yicheng.png",p:150000,cps:1500,r:"legendary"}, // updated image
  {n:"Ben Lee",img:"Ben.png",p:500000,r:"secret",secret:true},
  {n:"Amare",img:"Amare.png",p:1000000,r:"secret",secret:true}
 ];
@@ -268,7 +268,6 @@ function achievementPopup(name){
  p.classList.add("show");
  setTimeout(()=>p.classList.remove("show"),2500);
 
- // Set achievement color in list to green
  document.querySelector(`#achievementsList div[data-name="${name}"]`).classList.remove("locked-achievement");
  document.querySelector(`#achievementsList div[data-name="${name}"]`).classList.add("unlocked-achievement");
 }
