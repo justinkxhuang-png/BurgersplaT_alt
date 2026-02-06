@@ -36,7 +36,7 @@ body{
 #center{flex:1;position:relative;}
 
 /* LEFT */
-#left{font-size:26px;text-align:center;}
+#left{font-size:32px;text-align:center;}
 
 /* TABS */
 .tabs button{
@@ -54,7 +54,7 @@ body{
  font-weight:800;
 }
 
-/* CONTENT AREAS */
+/* CONTENT */
 #sword,#skin{
  max-height:calc(100vh - 260px);
  overflow-y:auto;
@@ -78,6 +78,10 @@ body{
  padding:6px;
  font-family:inherit;
  cursor:pointer;
+}
+.locked{
+ opacity:0.4;
+ pointer-events:none;
 }
 
 /* RARITIES */
@@ -122,6 +126,29 @@ body{
  width:48px;height:48px;
  transform:translate(-50%,-50%);
 }
+
+/* ACHIEVEMENT POPUP */
+#achievementPopup{
+ position:fixed;
+ bottom:40px;
+ left:50%;
+ transform:translateX(-50%) scale(0.8);
+ background:linear-gradient(90deg,#35e3ff,#8af0ff);
+ color:#000;
+ padding:16px 28px;
+ border-radius:12px;
+ font-size:20px;
+ font-weight:800;
+ box-shadow:0 0 30px #35e3ff;
+ opacity:0;
+ pointer-events:none;
+ transition:0.4s ease;
+ z-index:999;
+}
+#achievementPopup.show{
+ opacity:1;
+ transform:translateX(-50%) scale(1);
+}
 </style>
 </head>
 
@@ -155,6 +182,7 @@ body{
 </div>
 
 <img id="cursor" src="Wood.webp">
+<div id="achievementPopup"></div>
 
 <script>
 /* DATA */
@@ -165,7 +193,7 @@ const swords=[
  {n:"Diamond Sword",d:70,p:4000,r:"mythic",img:"Diamond.webp"},
  {n:"Amethyst Sword",d:150,p:10000,r:"legendary",img:"Amethyst.webp"},
  {n:"Tungsten Sword",d:400,p:40000,r:"legendary",img:"Tungsten.webp"},
- {n:"???",d:999,p:100000,r:"secret",secret:true,img:"Yicheng_6.png"}
+ {n:"Yicheng Sword",d:999,p:100000,r:"secret",secret:true,img:"Yicheng_6.png"}
 ];
 
 const skins=[
@@ -176,30 +204,41 @@ const skins=[
  {n:"Entrepreneur",img:"Yicheng_3.png",p:10000,d:250,r:"mythic"},
  {n:"The Thinker",img:"Yicheng_5.png",p:50000,cps:999,r:"mythic"},
  {n:"Ascended to Heaven",img:"Yicheng_5.png",p:150000,cps:1500,r:"legendary"},
- {n:"???",img:"Ben.png",p:500000,r:"secret",secret:true},
- {n:"???",img:"Amare.png",p:1000000,r:"secret",secret:true}
+ {n:"Ben Lee",img:"Ben.png",p:500000,r:"secret",secret:true},
+ {n:"Amare",img:"Amare.png",p:1000000,r:"secret",secret:true}
+];
+
+const achievements=[
+ {n:"SAVAGE",c:()=>total>=10000},
+ {n:"RELENTLESS",c:()=>total>=100000},
+ {n:"MASACRE",c:()=>total>=1000000},
+ {n:"THE STRONGEST",c:()=>total>=10000000},
+ {n:"???",c:()=>total>=100000000,unlock:"THE END???"}
 ];
 
 /* STATE */
-let coins=0,total=0,combo=0,timer=0;
+let saveData=JSON.parse(localStorage.getItem("save"))||{};
+let coins=saveData.coins||0,total=saveData.total||0;
+let combo=0,timer=0;
 let sword=swords[0],skin=skins[0];
-const char=document.getElementById("character");
+let unlockedSwords=saveData.us||["Wooden Sword"];
+let unlockedSkins=saveData.uk||["Default"];
+let unlockedTitles=saveData.ut||[];
 
 /* CLICK */
-char.onclick=e=>{
- combo++; timer=100;
+character.onclick=e=>{
+ combo++; timer=120;
  let mult=1+combo/100;
- let dmg=Math.floor((skin.d||0 + sword.d)*mult);
+ let dmg=Math.floor((sword.d+(skin.d||0))*mult);
  coins+=dmg; total+=dmg;
  float(e.clientX,e.clientY,"+"+dmg);
  float(e.clientX+20,e.clientY-10,"x"+mult.toFixed(2));
- move();
- update();
+ move(); update(); checkAchievements();
 };
 
 function move(){
- char.style.left=Math.random()*75+"%";
- char.style.top=Math.random()*65+"%";
+ character.style.left=Math.random()*75+"%";
+ character.style.top=Math.random()*65+"%";
 }
 
 function float(x,y,t){
@@ -211,77 +250,107 @@ function float(x,y,t){
  setTimeout(()=>d.remove(),900);
 }
 
-/* LOOP */
 setInterval(()=>{
  timer--;
  if(timer<=0) combo=0;
+ comboText();
+},50);
+
+function comboText(){
  document.getElementById("combo").textContent="x"+(1+combo/100).toFixed(2);
  document.getElementById("comboLeft").textContent="x"+(1+combo/100).toFixed(2);
-},50);
+}
+
+/* ACHIEVEMENTS */
+function achievementPopup(name){
+ let p=document.getElementById("achievementPopup");
+ p.textContent="🏆 ACHIEVEMENT UNLOCKED: "+name;
+ p.classList.add("show");
+ setTimeout(()=>p.classList.remove("show"),2500);
+}
+
+function checkAchievements(){
+ achievements.forEach(a=>{
+  if(a.c()&&!unlockedTitles.includes(a.n)){
+   unlockedTitles.push(a.n);
+   achievementPopup(a.n);
+   if(a.unlock){
+    unlockedTitles.push(a.unlock);
+    achievementPopup(a.unlock);
+   }
+  }
+ });
+}
 
 /* BUILD */
 function build(){
  let s=document.getElementById("sword"); s.innerHTML="";
  swords.forEach(sw=>{
+  let owned=unlockedSwords.includes(sw.n);
   s.innerHTML+=`
   <div class="item ${sw.r}">
-   <img src="${sw.img}">
-   <div><b>${sw.secret?"???":sw.n}</b><br>
-   DMG: ${sw.secret?"???":sw.d}<br>
-   Cost: ${sw.p}<button onclick="equipSword('${sw.n}')">Equip</button>
+   <img src="${sw.img}" style="${sw.secret&&!owned?'filter:brightness(0);':''}">
+   <div>
+    <b>${sw.secret&&!owned?"???":sw.n}</b><br>
+    DMG: ${sw.secret&&!owned?"???":sw.d}<br>
+    Cost: ${sw.p}
+    <button ${!owned&&coins<sw.p?'class="locked"':''}
+     onclick="buySword('${sw.n}')">${owned?"Equip":"Buy"}</button>
    </div>
   </div>`;
  });
 
  let k=document.getElementById("skin"); k.innerHTML="";
  skins.forEach(sk=>{
+  let owned=unlockedSkins.includes(sk.n);
   k.innerHTML+=`
   <div class="item ${sk.r}">
-   <img src="${sk.img}" style="${sk.secret?'filter:brightness(0);':''}">
-   <div><b>${sk.secret?"???":sk.n}</b><br>
-   DMG/CPS: ${sk.secret?"???":(sk.cps||sk.d)}<br>
-   Cost: ${sk.p}<button onclick="equipSkin('${sk.n}')">Equip</button>
+   <img src="${sk.img}" style="${sk.secret&&!owned?'filter:brightness(0);':''}">
+   <div>
+    <b>${sk.secret&&!owned?"???":sk.n}</b><br>
+    DMG/CPS: ${sk.secret&&!owned?"???":(sk.cps||sk.d)}<br>
+    Cost: ${sk.p}
+    <button ${!owned&&coins<sk.p?'class="locked"':''}
+     onclick="buySkin('${sk.n}')">${owned?"Equip":"Buy"}</button>
    </div>
   </div>`;
  });
 }
 
-function equipSword(n){
+function buySword(n){
  let sw=swords.find(x=>x.n===n);
- if(sw&&coins>=sw.p){
-  sword=sw;
-  document.getElementById("cursor").src=sw.img;
- }
+ if(unlockedSwords.includes(n)){sword=sw;cursor.src=sw.img;return;}
+ if(coins>=sw.p){coins-=sw.p;unlockedSwords.push(n);sword=sw;cursor.src=sw.img;build();}
 }
-
-function equipSkin(n){
+function buySkin(n){
  let sk=skins.find(x=>x.n===n);
- if(sk&&coins>=sk.p){
-  skin=sk;
-  char.src=sk.img;
- }
+ if(unlockedSkins.includes(n)){skin=sk;character.src=sk.img;return;}
+ if(coins>=sk.p){coins-=sk.p;unlockedSkins.push(n);skin=sk;character.src=sk.img;build();}
 }
 
 function tab(id,b){
- ["sword","skin"].forEach(x=>document.getElementById(x).style.display="none");
+ sword.style.display="none";
+ skin.style.display="none";
  document.getElementById(id).style.display="block";
  document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
  b.classList.add("active");
 }
 
 function update(){
- document.getElementById("total").textContent=total;
- document.getElementById("dpc").textContent=sword.d+(skin.d||0);
+ totalEl.textContent=total;
+ dpc.textContent=sword.d+(skin.d||0);
 }
 
 function save(){
- localStorage.setItem("save",JSON.stringify({total}));
+ localStorage.setItem("save",JSON.stringify({
+  coins,total,us:unlockedSwords,uk:unlockedSkins,ut:unlockedTitles
+ }));
  alert("Saved!");
 }
 
 document.addEventListener("mousemove",e=>{
- let c=document.getElementById("cursor");
- c.style.left=e.clientX+"px"; c.style.top=e.clientY+"px";
+ cursor.style.left=e.clientX+"px";
+ cursor.style.top=e.clientY+"px";
 });
 
 build(); move(); update();
