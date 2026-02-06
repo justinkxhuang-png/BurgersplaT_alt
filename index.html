@@ -24,7 +24,7 @@ body{
  box-shadow:0 0 30px #000;
 }
 #top div{
- font-size:34px;
+ font-size:36px;
  margin:8px 0;
  color:#35e3ff;
  font-weight:800;
@@ -36,13 +36,13 @@ body{
 #center{flex:1;position:relative;}
 
 /* LEFT */
-#left{font-size:24px;text-align:center;}
+#left{font-size:26px;text-align:center;}
 
 /* TABS */
 .tabs button{
- width:25%;
- padding:16px;
- font-size:16px;
+ width:33.33%;
+ padding:18px;
+ font-size:18px;
  background:#0f2238;
  border:none;
  color:white;
@@ -52,6 +52,12 @@ body{
  background:#35e3ff;
  color:black;
  font-weight:800;
+}
+
+/* CONTENT AREAS */
+#sword,#skin{
+ max-height:calc(100vh - 260px);
+ overflow-y:auto;
 }
 
 /* ITEMS */
@@ -79,7 +85,7 @@ body{
 .rare{border-color:gold;}
 .epic{border-color:purple;}
 .mythic{border-color:red;}
-.legendary{border-color:black;}
+.legendary{border-color:hotpink;}
 .secret{
  border-color:transparent;
  background:
@@ -100,7 +106,7 @@ body{
 /* FLOAT */
 .float{
  position:absolute;
- font-size:34px;
+ font-size:36px;
  font-weight:800;
  pointer-events:none;
  animation:float 0.9s forwards;
@@ -113,7 +119,7 @@ body{
 #cursor{
  position:fixed;
  pointer-events:none;
- font-size:34px;
+ width:48px;height:48px;
  transform:translate(-50%,-50%);
 }
 </style>
@@ -140,28 +146,26 @@ body{
   <div class="tabs">
    <button onclick="tab('sword',this)" class="active">SWORD</button>
    <button onclick="tab('skin',this)">SKIN</button>
-   <button onclick="tab('stats',this)">STATS</button>
    <button onclick="save()">SAVE</button>
   </div>
 
   <div id="sword"></div>
   <div id="skin" style="display:none"></div>
-  <div id="stats" style="display:none"></div>
  </div>
 </div>
 
-<div id="cursor">🪵</div>
+<img id="cursor" src="Wood.webp">
 
 <script>
 /* DATA */
 const swords=[
- {n:"Wooden Sword",d:1,p:0,i:"🪵",r:"common",img:"wood.png"},
- {n:"Iron Sword",d:10,p:300,i:"⚔️",r:"rare",img:"iron.png"},
- {n:"Gold Sword",d:35,p:900,i:"🟡",r:"epic",img:"gold.png"},
- {n:"Diamond Sword",d:70,p:4000,i:"💎",r:"mythic",img:"diamond.png"},
- {n:"Amethyst Sword",d:150,p:10000,i:"🔮",r:"legendary",img:"amethyst.png"},
- {n:"Tungsten Sword",d:400,p:40000,i:"🔩",r:"legendary",img:"tungsten.png"},
- {n:"???",d:999,p:100000,i:"❓",r:"secret",secret:true,img:"secret.png"}
+ {n:"Wooden Sword",d:1,p:0,r:"common",img:"Wood.webp"},
+ {n:"Iron Sword",d:10,p:300,r:"rare",img:"Iron.webp"},
+ {n:"Gold Sword",d:35,p:900,r:"epic",img:"Gold.png"},
+ {n:"Diamond Sword",d:70,p:4000,r:"mythic",img:"Diamond.webp"},
+ {n:"Amethyst Sword",d:150,p:10000,r:"legendary",img:"Amethyst.webp"},
+ {n:"Tungsten Sword",d:400,p:40000,r:"legendary",img:"Tungsten.webp"},
+ {n:"???",d:999,p:100000,r:"secret",secret:true,img:"Yicheng_6.png"}
 ];
 
 const skins=[
@@ -171,6 +175,7 @@ const skins=[
  {n:"Grade 3 Pianist",img:"Wenyao.png",p:2500,d:50,r:"rare"},
  {n:"Entrepreneur",img:"Yicheng_3.png",p:10000,d:250,r:"mythic"},
  {n:"The Thinker",img:"Yicheng_5.png",p:50000,cps:999,r:"mythic"},
+ {n:"Ascended to Heaven",img:"Yicheng_5.png",p:150000,cps:1500,r:"legendary"},
  {n:"???",img:"Ben.png",p:500000,r:"secret",secret:true},
  {n:"???",img:"Amare.png",p:1000000,r:"secret",secret:true}
 ];
@@ -178,7 +183,6 @@ const skins=[
 /* STATE */
 let coins=0,total=0,combo=0,timer=0;
 let sword=swords[0],skin=skins[0];
-
 const char=document.getElementById("character");
 
 /* CLICK */
@@ -244,25 +248,25 @@ function build(){
 
 function equipSword(n){
  let sw=swords.find(x=>x.n===n);
- if(sw&&coins>=sw.p){sword=sw;document.getElementById("cursor").textContent=sw.i;}
+ if(sw&&coins>=sw.p){
+  sword=sw;
+  document.getElementById("cursor").src=sw.img;
+ }
 }
 
 function equipSkin(n){
  let sk=skins.find(x=>x.n===n);
- if(sk&&coins>=sk.p){skin=sk;char.src=sk.img;}
+ if(sk&&coins>=sk.p){
+  skin=sk;
+  char.src=sk.img;
+ }
 }
 
 function tab(id,b){
- ["sword","skin","stats"].forEach(x=>document.getElementById(x).style.display="none");
+ ["sword","skin"].forEach(x=>document.getElementById(x).style.display="none");
  document.getElementById(id).style.display="block";
  document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
  b.classList.add("active");
- if(id==="stats"){
-  document.getElementById("stats").innerHTML=`
-   <p>Total Damage: ${total}</p>
-   <p>Damage / Click: ${sword.d+ (skin.d||0)}</p>
-   <p>Combo: x${(1+combo/100).toFixed(2)}</p>`;
- }
 }
 
 function update(){
@@ -270,7 +274,10 @@ function update(){
  document.getElementById("dpc").textContent=sword.d+(skin.d||0);
 }
 
-function save(){localStorage.setItem("save",JSON.stringify({total}));alert("Saved");}
+function save(){
+ localStorage.setItem("save",JSON.stringify({total}));
+ alert("Saved!");
+}
 
 document.addEventListener("mousemove",e=>{
  let c=document.getElementById("cursor");
