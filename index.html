@@ -18,23 +18,23 @@ body{
 
 /* TOP HUD */
 #top{
- padding:18px;
+ padding:8px;
  text-align:center;
  background:linear-gradient(90deg,#071b2f,#02060c);
  box-shadow:0 0 30px #000;
+ font-size:24px;
 }
 #top div{
- font-size:36px;
- margin:6px 0;
+ margin:4px 0;
  color:#35e3ff;
  font-weight:800;
 }
 #comboBarContainer{
- width:200px;
- height:18px;
+ width:150px;
+ height:12px;
  background:#0f2238;
  border-radius:12px;
- margin:6px auto;
+ margin:4px auto;
  overflow:hidden;
  display:none;
 }
@@ -46,38 +46,49 @@ body{
 }
 
 /* LAYOUT */
-#game{display:flex;height:calc(100vh - 160px);}
-#left,#right{width:320px;background:#0d1626;padding:14px;overflow-y:auto;}
+#game{
+ display:flex;
+ height:100vh;
+}
+#left,#right{
+ width:320px;
+ background:#0d1626;
+ padding:14px;
+ overflow-y:auto;
+ position:relative;
+ top:0;
+ height:100vh;
+}
 #center{flex:1;position:relative;}
 
 /* LEFT */
-#left{font-size:24px;text-align:center;}
+#left{font-size:20px;text-align:center;}
 #achievementsHeader{
- font-size:32px; /* Slightly bigger than tabs */
+ font-size:28px;
  font-weight:800;
- margin-bottom:16px;
+ margin-bottom:12px;
  color:#35e3ff;
 }
 #achievementsList div{
- margin-top:16px;
+ margin-top:12px;
  font-weight:800;
  cursor:pointer;
- font-size:28px;
+ font-size:22px;
+}
+.achievement-desc{
+ font-size:18px;
+ color:#35e3ff;
+ margin-top:2px;
+ margin-bottom:10px;
 }
 .locked-achievement{color:grey;}
 .unlocked-achievement{color:limegreen;}
-.achievement-desc{
- font-size:24px;
- color:#35e3ff;
- margin-top:2px;
- margin-bottom:12px;
-}
 
 /* TABS */
 .tabs button{
  width:33.33%;
- padding:18px;
- font-size:18px;
+ padding:14px;
+ font-size:16px;
  background:#0f2238;
  border:none;
  color:white;
@@ -91,7 +102,7 @@ body{
 
 /* CONTENT */
 #swordDiv,#skinDiv{
- max-height:calc(100vh - 260px);
+ max-height:calc(100vh - 28px);
  overflow-y:auto;
 }
 
@@ -100,7 +111,7 @@ body{
  display:flex;
  gap:12px;
  background:#091728;
- margin-bottom:14px;
+ margin-bottom:12px;
  padding:12px;
  border-left:8px solid;
 }
@@ -143,7 +154,7 @@ body{
 /* FLOAT */
 .float{
  position:absolute;
- font-size:36px;
+ font-size:28px;
  font-weight:800;
  pointer-events:none;
  animation:float 0.9s forwards;
@@ -320,8 +331,11 @@ function achievementPopup(name){
  p.classList.add("show");
  setTimeout(()=>p.classList.remove("show"),2500);
 
- document.querySelector(`#achievementsList div[data-name="${name}"]`).classList.remove("locked-achievement");
- document.querySelector(`#achievementsList div[data-name="${name}"]`).classList.add("unlocked-achievement");
+ const elem=document.querySelector(`#achievementsList div[data-name="${name}"]`);
+ if(elem){
+   elem.classList.remove("locked-achievement");
+   elem.classList.add("unlocked-achievement");
+ }
 }
 
 function checkAchievements(){
@@ -333,7 +347,7 @@ function checkAchievements(){
     div.className = unlockedTitles.includes(a.n) ? "unlocked-achievement" : "locked-achievement";
     div.onclick=()=>{
       if(div.nextElementSibling && div.nextElementSibling.classList.contains("achievement-desc")){
-        div.nextElementSibling.remove(); // toggle off
+        div.nextElementSibling.remove();
       } else {
         const allDesc=document.querySelectorAll(".achievement-desc");
         allDesc.forEach(d=>d.remove());
