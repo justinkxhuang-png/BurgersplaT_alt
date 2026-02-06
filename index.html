@@ -60,10 +60,11 @@ body{
 }
 .locked-achievement{color:grey;}
 .unlocked-achievement{color:limegreen;}
-#achievementDesc{
- margin-top:4px;
+.achievement-desc{
  font-size:24px;
  color:#35e3ff;
+ margin-top:2px;
+ margin-bottom:12px;
 }
 
 /* TABS */
@@ -191,7 +192,6 @@ body{
 <div id="game">
  <div id="left">
   ACHIEVEMENTS:<div id="achievementsList"></div>
-  <div id="achievementDesc"></div>
  </div>
 
  <div id="center">
@@ -227,7 +227,7 @@ const swords=[
 
 const skins=[
  {n:"Default",img:"YIcheng_4.png",p:0,d:1,r:"common"},
- {n:"Failure",img:"Yicheng_2.png",p:100,d:5,r:"common"}, // updated dmg/cps
+ {n:"Failure",img:"Yicheng_2.png",p:100,d:5,r:"common"}, 
  {n:"Forehead",img:"Wenyao_2.png",p:500,d:10,r:"common"},
  {n:"Grade 3 Pianist",img:"Wenyao.png",p:2500,d:50,r:"rare"},
  {n:"Entrepreneur",img:"Yicheng_3.png",p:10000,d:250,r:"mythic"},
@@ -238,14 +238,15 @@ const skins=[
 ];
 
 const achievements=[
+ {n:"SWORDSMAN",desc:"Unlock all swords",c:()=>unlockedSwords.length===swords.length},
+ {n:"MASTERMIND",desc:"Unlock all skins",c:()=>unlockedSkins.length===skins.length},
+ {n:"COLLECTOR",desc:"Unlock all swords and skins",c:()=>unlockedSwords.length===swords.length && unlockedSkins.length===skins.length},
+ {n:"COMBOMASTER",desc:"Achieve a combo of 500",c:()=>combo>=500},
  {n:"SAVAGE",desc:"Reach 10,000 total damage",c:()=>total>=10000},
  {n:"RELENTLESS",desc:"Reach 100,000 total damage",c:()=>total>=100000},
  {n:"MASACRE",desc:"Reach 1,000,000 total damage",c:()=>total>=1000000},
  {n:"THE STRONGEST",desc:"Reach 10,000,000 total damage",c:()=>total>=10000000},
- {n:"???",desc:"Reach 100,000,000 total damage",c:()=>total>=100000000,unlock:"THE END???"},
- {n:"SWORDSMAN",desc:"Unlock all swords",c:()=>unlockedSwords.length===swords.length},
- {n:"MASTERMIND",desc:"Unlock all skins",c:()=>unlockedSkins.length===skins.length},
- {n:"COLLECTOR",desc:"Unlock all swords and skins",c:()=>unlockedSwords.length===swords.length && unlockedSkins.length===skins.length}
+ {n:"???",desc:"Reach 100,000,000 total damage",c:()=>total>=100000000,unlock:"THE END???"}
 ];
 
 /* STATE */
@@ -264,7 +265,6 @@ const swordDiv=document.getElementById("swordDiv");
 const skinDiv=document.getElementById("skinDiv");
 const character=document.getElementById("character");
 const achievementsList=document.getElementById("achievementsList");
-const achievementDesc=document.getElementById("achievementDesc");
 const comboEl=document.getElementById("combo");
 const comboBarContainer=document.getElementById("comboBarContainer");
 const comboBar=document.getElementById("comboBar");
@@ -272,7 +272,7 @@ const comboBar=document.getElementById("comboBar");
 /* CLICK */
 character.onclick=e=>{
  combo++; comboTimer=60;
- total+=sword.d + (skin.d||0); // fixed: combo increments by +1
+ total+=sword.d + (skin.d||0); 
  float(e.clientX,e.clientY,"+"+(sword.d+(skin.d||0)));
  move(); update(); checkAchievements();
 };
@@ -281,7 +281,7 @@ character.onclick=e=>{
 setInterval(()=>{
  if(comboTimer>0){
   comboTimer--;
-  comboEl.textContent="x"+(1+combo);
+  comboEl.textContent="x"+combo;
   comboBarContainer.style.display="block";
   comboBar.style.width=Math.min((comboTimer/60)*100,100)+"%";
  } else {
@@ -325,7 +325,15 @@ function checkAchievements(){
     div.dataset.name=a.n;
     div.className = unlockedTitles.includes(a.n) ? "unlocked-achievement" : "locked-achievement";
     div.onclick=()=>{
-      achievementDesc.textContent = (achievementDesc.textContent===a.desc?"":a.desc);
+      // Remove any other descs
+      const allDesc=document.querySelectorAll(".achievement-desc");
+      allDesc.forEach(d=>d.remove());
+      if(!div.nextElementSibling || !div.nextElementSibling.classList.contains("achievement-desc")){
+        const desc=document.createElement("div");
+        desc.className="achievement-desc";
+        desc.textContent=a.desc;
+        div.parentNode.insertBefore(desc,div.nextSibling);
+      }
     };
     achievementsList.appendChild(div);
   }
