@@ -5,118 +5,109 @@
 <title>Clicker Combat</title>
 
 <style>
-:root {
-  --bg: #070b14;
-  --panel: #0d1626;
-  --neon: #35e3ff;
-  --text: #e6f1ff;
-}
-
-* { box-sizing: border-box; }
-
 body {
   margin: 0;
-  font-family: "Segoe UI", sans-serif;
   background: radial-gradient(circle at top, #0b1a2f, #04070e);
-  color: var(--text);
+  font-family: "Segoe UI", sans-serif;
+  color: #e6f1ff;
   overflow: hidden;
   cursor: none;
 }
 
-/* TOP BAR */
 #top {
-  height: 70px;
+  padding: 10px;
   background: linear-gradient(90deg, #071b2f, #02060c);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--neon);
-  box-shadow: 0 0 25px #000;
+  box-shadow: 0 0 20px #000;
+  text-align: center;
 }
 
-/* LAYOUT */
+#top div {
+  font-size: 18px;
+  margin: 4px 0;
+  color: #35e3ff;
+  font-weight: bold;
+}
+
 #game {
   display: flex;
-  height: calc(100vh - 70px);
+  height: calc(100vh - 90px);
 }
 
-/* LEFT */
-#left {
-  width: 260px;
-  background: var(--panel);
-  padding: 15px;
+#left, #right {
+  width: 300px;
+  background: #0d1626;
+  padding: 10px;
+  overflow-y: auto;
 }
 
-/* CENTER */
 #center {
   flex: 1;
   position: relative;
-  overflow: hidden;
 }
 
-/* RIGHT */
-#right {
-  width: 320px;
-  background: var(--panel);
-  padding: 10px;
-}
-
-/* TABS */
 .tabs button {
   width: 33%;
   padding: 10px;
   background: #0f2238;
   border: none;
-  color: var(--text);
+  color: white;
   cursor: pointer;
 }
 .tabs button.active {
-  background: var(--neon);
-  color: #000;
+  background: #35e3ff;
+  color: black;
   font-weight: bold;
 }
 
-/* CHARACTER */
-#character {
-  position: absolute;
-  width: 140px;
-  cursor: pointer;
-  transition: transform 0.05s;
-}
-#character:active {
-  transform: scale(0.95);
-}
-
-/* DAMAGE FLOAT */
-.damage {
-  position: absolute;
-  color: #ff5;
-  font-weight: bold;
-  pointer-events: none;
-  animation: float 0.8s ease-out forwards;
-}
-@keyframes float {
-  to { transform: translateY(-40px); opacity: 0; }
-}
-
-/* SHOP ITEMS */
 .item {
   background: #091728;
-  margin-bottom: 8px;
-  padding: 8px;
-  border-left: 5px solid #555;
-}
-.item button {
-  float: right;
+  margin-bottom: 10px;
+  padding: 12px;
+  border-left: 6px solid #35e3ff;
+  font-size: 18px;
 }
 
-/* CURSOR */
+.item button {
+  margin-top: 8px;
+  width: 100%;
+  padding: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#character {
+  position: absolute;
+  width: 160px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.damage {
+  position: absolute;
+  font-size: 26px;
+  font-weight: bold;
+  color: gold;
+  pointer-events: none;
+  animation: float 0.9s ease-out forwards;
+}
+
+.comboText {
+  position: absolute;
+  font-size: 32px;
+  font-weight: 900;
+  color: #ff4;
+  pointer-events: none;
+  animation: float 0.9s ease-out forwards;
+}
+
+@keyframes float {
+  to { transform: translateY(-50px); opacity: 0; }
+}
+
 #cursor {
   position: fixed;
   pointer-events: none;
-  font-size: 28px;
+  font-size: 30px;
   transform: translate(-50%, -50%);
 }
 </style>
@@ -125,26 +116,24 @@ body {
 <body>
 
 <div id="top">
-  Total Damage: <span id="total">0</span> |
-  Damage / Click: <span id="dpc">1</span> |
-  Combo: <span id="combo">1x</span>
+  <div>Total Damage: <span id="total">0</span></div>
+  <div>Damage / Click: <span id="dpc">1</span></div>
+  <div>Combo: <span id="combo">x1.00</span></div>
 </div>
 
 <div id="game">
-
   <div id="left">
-    <p>Coins: <b id="coins">0</b></p>
-    <p>Combo Timer</p>
-    <progress id="comboBar" value="0" max="100"></progress>
+    <p><b>Coins:</b> <span id="coins">0</span></p>
+    <progress id="comboBar" max="100" value="0"></progress>
   </div>
 
   <div id="center">
-    <img id="character" src="Yicheng_5.png">
+    <img id="character" src="Yicheng_4.png">
   </div>
 
   <div id="right">
     <div class="tabs">
-      <button onclick="showTab('shop')" class="active">SHOP</button>
+      <button class="active" onclick="showTab('shop')">SHOP</button>
       <button onclick="showTab('stats')">STATS</button>
       <button onclick="saveGame()">SAVE</button>
     </div>
@@ -152,90 +141,91 @@ body {
     <div id="shop"></div>
     <div id="stats" style="display:none"></div>
   </div>
-
 </div>
 
-<div id="cursor">🗡️</div>
+<div id="cursor">🪵</div>
 
 <script>
 /* ---------------- DATA ---------------- */
 const swords = [
- {name:"Wooden Sword", dmg:1, price:0, icon:"🪵", rarity:"COMMON"},
- {name:"Iron Sword", dmg:10, price:300, icon:"⚔️", rarity:"RARE"},
- {name:"Gold Sword", dmg:35, price:900, icon:"🟡", rarity:"EPIC"},
- {name:"Diamond Sword", dmg:70, price:4000, icon:"💎", rarity:"MYTHIC"},
- {name:"Amethyst Sword", dmg:150, price:10000, icon:"🔮", rarity:"LEGENDARY"},
- {name:"Tungsten Sword", dmg:400, price:40000, icon:"🔩", rarity:"LEGENDARY"},
- {name:"Yicheng Sword", dmg:999, price:100000, icon:"❓", rarity:"SECRET"}
+ {name:"Wooden Sword", dmg:1, price:0, icon:"🪵"},
+ {name:"Iron Sword", dmg:10, price:300, icon:"⚔️"},
+ {name:"Gold Sword", dmg:35, price:900, icon:"🟡"},
+ {name:"Diamond Sword", dmg:70, price:4000, icon:"💎"},
+ {name:"Amethyst Sword", dmg:150, price:10000, icon:"🔮"},
+ {name:"Tungsten Sword", dmg:400, price:40000, icon:"🔩"},
+ {name:"Yicheng Sword", dmg:999, price:100000, icon:"❓"}
 ];
 
 const characters = [
- {name:"Forehead", cps:1, cost:0, img:"Yicheng_5.png", rarity:"COMMON"},
- {name:"Grade 3 Pianist", cps:5, cost:1000, img:"Yicheng_5.png", rarity:"RARE"},
- {name:"Entrepreneur", cps:25, cost:10000, img:"Yicheng_5.png", rarity:"EPIC"},
- {name:"The Thinker", cps:999, cost:50000, img:"Yicheng_5.png", rarity:"MYTHIC"},
- {name:"Ascended to Heaven", cps:1500, cost:150000, img:"Yicheng_5.png", rarity:"LEGENDARY"},
- {name:"???", cps:"???", cost:500000, img:"Ben.png", rarity:"SECRET"},
- {name:"???", cps:"???", cost:1000000, img:"Amare.png", rarity:"SECRET"}
+ {name:"Forehead", img:"Yicheng_4.png", cost:0},
+ {name:"Grade 3 Pianist", img:"Yicheng_5.png", cost:1000},
+ {name:"Entrepreneur", img:"Yicheng_5.png", cost:10000},
+ {name:"The Thinker", img:"Yicheng_5.png", cost:50000},
+ {name:"Ascended to Heaven", img:"Yicheng_5.png", cost:150000},
+ {name:"???", img:"Ben.png", cost:500000, secret:true},
+ {name:"???", img:"Amare.png", cost:1000000, secret:true}
 ];
 
 /* ---------------- STATE ---------------- */
-let coins = 0;
-let totalDamage = 0;
-let sword = swords[0];
-let combo = 0;
-let comboTimer = 0;
+let coins=0, totalDamage=0;
+let sword=swords[0];
+let character=characters[0];
+let combo=0, comboTimer=0;
 
-/* ---------------- UI ---------------- */
-const char = document.getElementById("character");
-
-char.onclick = e => {
+/* ---------------- CLICK ---------------- */
+const charEl=document.getElementById("character");
+charEl.onclick=e=>{
   combo++;
-  comboTimer = 100;
-  let mult = 1 + combo/100;
-  let dmg = Math.floor(sword.dmg * mult);
-  coins += dmg;
-  totalDamage += dmg;
+  comboTimer=100;
+  let mult=1+combo/100;
+  let dmg=Math.floor(sword.dmg*mult);
 
-  spawnDamage(e.clientX, e.clientY, dmg);
+  coins+=dmg;
+  totalDamage+=dmg;
+
+  spawnText(e.clientX,e.clientY,"+"+dmg,"damage");
+  spawnText(e.clientX+20,e.clientY-10,"x"+mult.toFixed(2),"comboText");
+
   moveCharacter();
   updateUI();
 };
 
-function moveCharacter() {
-  char.style.left = Math.random() * 80 + "%";
-  char.style.top = Math.random() * 70 + "%";
+/* ---------------- EFFECTS ---------------- */
+function spawnText(x,y,text,cls){
+  let d=document.createElement("div");
+  d.className=cls;
+  d.style.left=x+"px";
+  d.style.top=y+"px";
+  d.textContent=text;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),900);
 }
 
-function spawnDamage(x,y,val) {
-  let d = document.createElement("div");
-  d.className = "damage";
-  d.style.left = x+"px";
-  d.style.top = y+"px";
-  d.textContent = "+"+val;
-  document.body.appendChild(d);
-  setTimeout(()=>d.remove(),800);
+function moveCharacter(){
+  charEl.style.left=Math.random()*75+"%";
+  charEl.style.top=Math.random()*65+"%";
 }
 
 /* ---------------- LOOP ---------------- */
 setInterval(()=>{
   comboTimer--;
-  if(comboTimer<=0){ combo=0; }
-  document.getElementById("comboBar").value = comboTimer;
-  document.getElementById("combo").textContent = (1+combo/100).toFixed(2)+"x";
+  if(comboTimer<=0) combo=0;
+  document.getElementById("comboBar").value=comboTimer;
+  document.getElementById("combo").textContent="x"+(1+combo/100).toFixed(2);
 },50);
 
 /* ---------------- SHOP ---------------- */
 function buildShop(){
-  let s = document.getElementById("shop");
+  let s=document.getElementById("shop");
   s.innerHTML="<h3>Swords</h3>";
   swords.forEach(sw=>{
     let d=document.createElement("div");
     d.className="item";
-    d.innerHTML=`${sw.icon} ${sw.name} (${sw.dmg})<button>${sw.price}</button>`;
+    d.innerHTML=`<b>${sw.icon} ${sw.name}</b><br>DMG: ${sw.dmg}<br>Cost: ${sw.price}
+    <button>Equip</button>`;
     d.onclick=()=>{
       if(coins>=sw.price){
-        coins-=sw.price;
         sword=sw;
         document.getElementById("cursor").textContent=sw.icon;
         updateUI();
@@ -243,26 +233,46 @@ function buildShop(){
     };
     s.appendChild(d);
   });
+
+  s.innerHTML+="<h3>Characters</h3>";
+  characters.forEach(c=>{
+    let d=document.createElement("div");
+    d.className="item";
+    d.innerHTML=`<b>${c.secret?"???":c.name}</b><br>Cost: ${c.cost}
+    <button>Equip</button>`;
+    d.onclick=()=>{
+      if(coins>=c.cost){
+        character=c;
+        charEl.src=c.img;
+      }
+    };
+    s.appendChild(d);
+  });
+}
+
+/* ---------------- STATS ---------------- */
+function buildStats(){
+  document.getElementById("stats").innerHTML=`
+    <p>Total Damage: ${totalDamage}</p>
+    <p>Coins: ${coins}</p>
+    <p>Damage / Click: ${sword.dmg}</p>
+    <p>Equipped Sword: ${sword.name}</p>
+    <p>Equipped Character: ${character.name}</p>
+  `;
+}
+
+function showTab(tab){
+  document.getElementById("shop").style.display=tab==="shop"?"block":"none";
+  document.getElementById("stats").style.display=tab==="stats"?"block":"none";
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+  event.target.classList.add("active");
+  if(tab==="stats") buildStats();
 }
 
 /* ---------------- SAVE ---------------- */
 function saveGame(){
-  localStorage.setItem("clickerSave",JSON.stringify({coins,totalDamage,sword:sword.name}));
+  localStorage.setItem("clickerSave",JSON.stringify({coins,totalDamage,sword:sword.name,character:character.name}));
   alert("Saved!");
-}
-
-function loadGame(){
-  let s=JSON.parse(localStorage.getItem("clickerSave"));
-  if(!s)return;
-  coins=s.coins;
-  totalDamage=s.totalDamage;
-  sword=swords.find(x=>x.name===s.sword)||swords[0];
-}
-
-function updateUI(){
-  document.getElementById("coins").textContent=coins;
-  document.getElementById("total").textContent=totalDamage;
-  document.getElementById("dpc").textContent=sword.dmg;
 }
 
 /* ---------------- CURSOR ---------------- */
@@ -273,10 +283,15 @@ document.addEventListener("mousemove",e=>{
 });
 
 /* INIT */
-loadGame();
 buildShop();
-updateUI();
 moveCharacter();
+updateUI();
+function updateUI(){
+  coins=Math.floor(coins);
+  document.getElementById("coins").textContent=coins;
+  document.getElementById("total").textContent=totalDamage;
+  document.getElementById("dpc").textContent=sword.dmg;
+}
 </script>
 
 </body>
