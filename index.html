@@ -234,7 +234,7 @@ const swords=[
 
 const skins=[
  {n:"Default",img:"YIcheng_4.png",p:0,d:1,r:"common"},
- {n:"Failure",img:"Yicheng_2.png",p:100,d:5,r:"common"}, 
+ {n:"Failure",img:"Yicheng_2.png",p:100,d:5,r:"common"},
  {n:"Forehead",img:"Wenyao_2.png",p:500,d:10,r:"common"},
  {n:"Grade 3 Pianist",img:"Wenyao.png",p:2500,d:50,r:"rare"},
  {n:"Entrepreneur",img:"Yicheng_3.png",p:10000,d:250,r:"mythic"},
@@ -367,8 +367,8 @@ function build(){
    <div>
     <b>${sw.secret&&!owned?"???":sw.n}</b><br>
     DMG: ${sw.secret&&!owned?"???":sw.d}<br>
-    Cost: ${sw.p} DAMAGE
-    <button class="${(!owned&&total>=sw.p?'buyable':'locked')}" onclick="buySword('${sw.n}')">${owned?"Equip":"Buy"}</button>
+    Cost: ${sw.p*5} DAMAGE
+    <button class="${(!owned&&total>=sw.p*5?'buyable':'locked')}" onclick="buySword('${sw.n}')">${owned?"Equip":"Buy"}</button>
    </div>
   </div>`;
  });
@@ -382,8 +382,8 @@ function build(){
    <div>
     <b>${sk.secret&&!owned?"???":sk.n}</b><br>
     DMG/CPS: ${sk.secret&&!owned?"???":(sk.cps||sk.d)}<br>
-    Cost: ${sk.p} DAMAGE
-    <button class="${(!owned&&total>=sk.p?'buyable':'locked')}" onclick="buySkin('${sk.n}')">${owned?"Equip":"Buy"}</button>
+    Cost: ${sk.p*5} DAMAGE
+    <button class="${(!owned&&total>=sk.p*5?'buyable':'locked')}" onclick="buySkin('${sk.n}')">${owned?"Equip":"Buy"}</button>
    </div>
   </div>`;
  });
@@ -391,15 +391,39 @@ function build(){
 
 /* BUY ITEMS */
 function buySword(n){
- let sw=swords.find(x=>x.n===n);
- if(unlockedSwords.includes(n)){sword=sw;cursor.src=sw.img;return;}
- if(total>=sw.p){unlockedSwords.push(n);sword=sw;cursor.src=sw.img;build();}
+ let sw = swords.find(x => x.n === n);
+ if(unlockedSwords.includes(n)){
+   sword = sw;
+   cursor.src = sw.img;
+   return;
+ }
+ let cost = sw.p * 5;
+ if(total >= cost){
+   total -= cost;
+   unlockedSwords.push(n);
+   sword = sw;
+   cursor.src = sw.img;
+   build();
+   update();
+ }
 }
 
 function buySkin(n){
- let sk=skins.find(x=>x.n===n);
- if(unlockedSkins.includes(n)){skin=sk;character.src=sk.img;return;}
- if(total>=sk.p){unlockedSkins.push(sk.n);skin=sk;character.src=sk.img;build();}
+ let sk = skins.find(x => x.n === n);
+ if(unlockedSkins.includes(n)){
+   skin = sk;
+   character.src = sk.img;
+   return;
+ }
+ let cost = sk.p * 5;
+ if(total >= cost){
+   total -= cost;
+   unlockedSkins.push(sk.n);
+   skin = sk;
+   character.src = sk.img;
+   build();
+   update();
+ }
 }
 
 /* TABS */
