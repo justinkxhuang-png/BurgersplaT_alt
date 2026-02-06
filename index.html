@@ -51,15 +51,20 @@ body{
 #center{flex:1;position:relative;}
 
 /* LEFT */
-#left{font-size:20px;text-align:center;}
+#left{font-size:24px;text-align:center;}
 #achievementsList div{
- margin-top:6px;
+ margin-top:16px;
  font-weight:800;
  cursor:pointer;
+ font-size:28px;
 }
 .locked-achievement{color:grey;}
 .unlocked-achievement{color:limegreen;}
-#achievementDesc{margin-top:8px;font-size:16px;color:#35e3ff;}
+#achievementDesc{
+ margin-top:4px;
+ font-size:24px;
+ color:#35e3ff;
+}
 
 /* TABS */
 .tabs button{
@@ -179,7 +184,7 @@ body{
 <div id="top">
  <div>TOTAL DAMAGE: <span id="total">0</span></div>
  <div>DAMAGE / CLICK: <span id="dpc">1</span></div>
- <div>COMBO: <span id="combo">x1.00</span></div>
+ <div>COMBO: <span id="combo">x1</span></div>
  <div id="comboBarContainer"><div id="comboBar"></div></div>
 </div>
 
@@ -222,7 +227,7 @@ const swords=[
 
 const skins=[
  {n:"Default",img:"YIcheng_4.png",p:0,d:1,r:"common"},
- {n:"Failure",img:"Yicheng_2.png",p:100,d:1,r:"common"},
+ {n:"Failure",img:"Yicheng_2.png",p:100,d:5,r:"common"}, // updated dmg/cps
  {n:"Forehead",img:"Wenyao_2.png",p:500,d:10,r:"common"},
  {n:"Grade 3 Pianist",img:"Wenyao.png",p:2500,d:50,r:"rare"},
  {n:"Entrepreneur",img:"Yicheng_3.png",p:10000,d:250,r:"mythic"},
@@ -267,9 +272,8 @@ const comboBar=document.getElementById("comboBar");
 /* CLICK */
 character.onclick=e=>{
  combo++; comboTimer=60;
- let dmg=Math.floor(sword.d+(skin.d||0)*(1+combo/100));
- total+=dmg;
- float(e.clientX,e.clientY,"+"+dmg);
+ total+=sword.d + (skin.d||0); // fixed: combo increments by +1
+ float(e.clientX,e.clientY,"+"+(sword.d+(skin.d||0)));
  move(); update(); checkAchievements();
 };
 
@@ -277,13 +281,13 @@ character.onclick=e=>{
 setInterval(()=>{
  if(comboTimer>0){
   comboTimer--;
-  comboEl.textContent="x"+(1+combo/100).toFixed(2);
+  comboEl.textContent="x"+(1+combo);
   comboBarContainer.style.display="block";
   comboBar.style.width=Math.min((comboTimer/60)*100,100)+"%";
  } else {
   combo=0;
   comboBarContainer.style.display="none";
-  comboEl.textContent="x1.00";
+  comboEl.textContent="x1";
  }
 },50);
 
@@ -320,7 +324,9 @@ function checkAchievements(){
     div.textContent=a.n;
     div.dataset.name=a.n;
     div.className = unlockedTitles.includes(a.n) ? "unlocked-achievement" : "locked-achievement";
-    div.onclick=()=>achievementDesc.textContent = (achievementDesc.textContent===a.desc?"":a.desc);
+    div.onclick=()=>{
+      achievementDesc.textContent = (achievementDesc.textContent===a.desc?"":a.desc);
+    };
     achievementsList.appendChild(div);
   }
   if(a.c() && !unlockedTitles.includes(a.n)){
