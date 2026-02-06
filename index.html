@@ -2,322 +2,281 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Clicker Game</title>
+<title>Clicker Combat</title>
 
 <style>
+:root {
+  --bg: #070b14;
+  --panel: #0d1626;
+  --neon: #35e3ff;
+  --text: #e6f1ff;
+}
+
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
   font-family: "Segoe UI", sans-serif;
-  background: linear-gradient(135deg, #141e30, #243b55);
-  color: white;
+  background: radial-gradient(circle at top, #0b1a2f, #04070e);
+  color: var(--text);
+  overflow: hidden;
+  cursor: none;
 }
 
-.header {
-  height: 60px;
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(10px);
+/* TOP BAR */
+#top {
+  height: 70px;
+  background: linear-gradient(90deg, #071b2f, #02060c);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  font-weight: bold;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--neon);
+  box-shadow: 0 0 25px #000;
 }
 
-.container {
+/* LAYOUT */
+#game {
   display: flex;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 70px);
 }
 
-.left {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-}
-
-.stats {
-  text-align: center;
-  font-size: 18px;
-}
-
-.clicker-wrapper {
-  position: relative;
-}
-
-.clicker {
+/* LEFT */
+#left {
   width: 260px;
-  cursor: pointer;
-  transition: transform 0.1s;
-}
-
-.clicker:active {
-  transform: scale(0.92);
-}
-
-.floating {
-  position: absolute;
-  color: gold;
-  font-weight: bold;
-  animation: floatUp 1s forwards;
-  pointer-events: none;
-}
-
-@keyframes floatUp {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-50px); }
-}
-
-.right {
-  width: 400px;
-  background: white;
-  color: #222;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-.upgrade {
-  background: white;
-  border-radius: 16px;
+  background: var(--panel);
   padding: 15px;
-  margin-bottom: 18px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
-.upgrade.equipped {
-  outline: 3px solid gold;
+/* CENTER */
+#center {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
 }
 
-.upgrade img.main {
-  width: 80px;
+/* RIGHT */
+#right {
+  width: 320px;
+  background: var(--panel);
+  padding: 10px;
 }
 
-button {
-  padding: 6px 12px;
-  border-radius: 8px;
+/* TABS */
+.tabs button {
+  width: 33%;
+  padding: 10px;
+  background: #0f2238;
   border: none;
+  color: var(--text);
   cursor: pointer;
+}
+.tabs button.active {
+  background: var(--neon);
+  color: #000;
   font-weight: bold;
 }
 
-.buy {
-  background: #4CAF50;
-  color: white;
+/* CHARACTER */
+#character {
+  position: absolute;
+  width: 140px;
+  cursor: pointer;
+  transition: transform 0.05s;
+}
+#character:active {
+  transform: scale(0.95);
 }
 
-.buy:disabled {
-  background: #aaa;
+/* DAMAGE FLOAT */
+.damage {
+  position: absolute;
+  color: #ff5;
+  font-weight: bold;
+  pointer-events: none;
+  animation: float 0.8s ease-out forwards;
+}
+@keyframes float {
+  to { transform: translateY(-40px); opacity: 0; }
 }
 
-.equip {
-  background: #2196F3;
-  color: white;
+/* SHOP ITEMS */
+.item {
+  background: #091728;
+  margin-bottom: 8px;
+  padding: 8px;
+  border-left: 5px solid #555;
+}
+.item button {
+  float: right;
+}
+
+/* CURSOR */
+#cursor {
+  position: fixed;
+  pointer-events: none;
+  font-size: 28px;
+  transform: translate(-50%, -50%);
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">🔥 My Clicker Game</div>
+<div id="top">
+  Total Damage: <span id="total">0</span> |
+  Damage / Click: <span id="dpc">1</span> |
+  Combo: <span id="combo">1x</span>
+</div>
 
-<div class="container">
+<div id="game">
 
-  <div class="left">
-    <div class="stats">
-      Clicks: <span id="clicks">0</span><br>
-      CPS: <span id="cps">0</span>
-    </div>
-
-    <div class="clicker-wrapper" id="clickerWrapper">
-      <img id="mainClicker" class="clicker" src="YIcheng_4.png">
-    </div>
+  <div id="left">
+    <p>Coins: <b id="coins">0</b></p>
+    <p>Combo Timer</p>
+    <progress id="comboBar" value="0" max="100"></progress>
   </div>
 
-  <div class="right">
-    <h2>Upgrades</h2>
-    <div id="upgrades"></div>
+  <div id="center">
+    <img id="character" src="Yicheng_5.png">
+  </div>
+
+  <div id="right">
+    <div class="tabs">
+      <button onclick="showTab('shop')" class="active">SHOP</button>
+      <button onclick="showTab('stats')">STATS</button>
+      <button onclick="saveGame()">SAVE</button>
+    </div>
+
+    <div id="shop"></div>
+    <div id="stats" style="display:none"></div>
   </div>
 
 </div>
 
+<div id="cursor">🗡️</div>
+
 <script>
-/* =======================
-   CORE GAME STATE
-======================= */
-
-let _clicks = 0;
-let equippedClicker = "YIcheng_4.png";
-
-const upgrades = [
-  { name:"Failure", cps:1, cost:50, scale:1.3, count:0, img:"Yicheng_2.png" },
-  { name:"Forehead", cps:10, cost:500, scale:1.35, count:0, img:"Wenyao_2.png" },
-  { name:"Grade 3 Pianist", cps:50, cost:2500, scale:1.4, count:0, img:"Wenyao.png" },
-  { name:"Entrepreneur", cps:250, cost:10000, scale:1.45, count:0, img:"Yicheng_3.png" },
-  { name:"Ascended to Heaven", cps:999, cost:50000, scale:1.5, count:0, img:"Yicheng.png" }
+/* ---------------- DATA ---------------- */
+const swords = [
+ {name:"Wooden Sword", dmg:1, price:0, icon:"🪵", rarity:"COMMON"},
+ {name:"Iron Sword", dmg:10, price:300, icon:"⚔️", rarity:"RARE"},
+ {name:"Gold Sword", dmg:35, price:900, icon:"🟡", rarity:"EPIC"},
+ {name:"Diamond Sword", dmg:70, price:4000, icon:"💎", rarity:"MYTHIC"},
+ {name:"Amethyst Sword", dmg:150, price:10000, icon:"🔮", rarity:"LEGENDARY"},
+ {name:"Tungsten Sword", dmg:400, price:40000, icon:"🔩", rarity:"LEGENDARY"},
+ {name:"Yicheng Sword", dmg:999, price:100000, icon:"❓", rarity:"SECRET"}
 ];
 
-/* =======================
-   HARD RESET (NUKE)
-======================= */
+const characters = [
+ {name:"Forehead", cps:1, cost:0, img:"Yicheng_5.png", rarity:"COMMON"},
+ {name:"Grade 3 Pianist", cps:5, cost:1000, img:"Yicheng_5.png", rarity:"RARE"},
+ {name:"Entrepreneur", cps:25, cost:10000, img:"Yicheng_5.png", rarity:"EPIC"},
+ {name:"The Thinker", cps:999, cost:50000, img:"Yicheng_5.png", rarity:"MYTHIC"},
+ {name:"Ascended to Heaven", cps:1500, cost:150000, img:"Yicheng_5.png", rarity:"LEGENDARY"},
+ {name:"???", cps:"???", cost:500000, img:"Ben.png", rarity:"SECRET"},
+ {name:"???", cps:"???", cost:1000000, img:"Amare.png", rarity:"SECRET"}
+];
 
-function HARD_RESET() {
-  console.clear();
-  console.warn("Invalid state detected. Resetting.");
+/* ---------------- STATE ---------------- */
+let coins = 0;
+let totalDamage = 0;
+let sword = swords[0];
+let combo = 0;
+let comboTimer = 0;
 
-  _clicks = 0;
-  equippedClicker = "YIcheng_4.png";
+/* ---------------- UI ---------------- */
+const char = document.getElementById("character");
 
-  upgrades.forEach(u => {
-    u.count = 0;
-    u.cost = Math.floor(u.cost / u.scale);
-  });
+char.onclick = e => {
+  combo++;
+  comboTimer = 100;
+  let mult = 1 + combo/100;
+  let dmg = Math.floor(sword.dmg * mult);
+  coins += dmg;
+  totalDamage += dmg;
 
-  localStorage.clear();
-  sessionStorage.clear();
-
-  updateUI();
-}
-
-/* =======================
-   PROTECTED CLICKS
-======================= */
-
-Object.defineProperty(window, "clicks", {
-  get() {
-    return _clicks;
-  },
-  set(v) {
-    const diff = Math.abs(v - _clicks);
-    if (diff > getCPS() + 25) {
-      HARD_RESET();
-    } else {
-      _clicks = v;
-    }
-  }
-});
-
-/* =======================
-   HELPERS
-======================= */
-
-function format(n) {
-  if (n >= 1e6) return (n/1e6).toFixed(2) + "M";
-  if (n >= 1e3) return (n/1e3).toFixed(1) + "K";
-  return Math.floor(n);
-}
-
-function getCPS() {
-  return upgrades.reduce((s,u)=>s + u.count * u.cps, 0);
-}
-
-/* =======================
-   CLICKING
-======================= */
-
-const clicker = document.getElementById("mainClicker");
-
-clicker.onclick = () => {
-  clicks += 1;
-  spawnFloat("+1");
+  spawnDamage(e.clientX, e.clientY, dmg);
+  moveCharacter();
   updateUI();
 };
 
-function spawnFloat(text) {
-  const span = document.createElement("span");
-  span.className = "floating";
-  span.textContent = text;
-  span.style.left = Math.random()*120 + "px";
-  document.getElementById("clickerWrapper").appendChild(span);
-  setTimeout(()=>span.remove(),1000);
+function moveCharacter() {
+  char.style.left = Math.random() * 80 + "%";
+  char.style.top = Math.random() * 70 + "%";
 }
 
-/* =======================
-   UPGRADES
-======================= */
-
-function buy(i) {
-  const u = upgrades[i];
-  if (clicks >= u.cost) {
-    clicks -= u.cost;
-    u.count++;
-    u.cost = Math.floor(u.cost * u.scale);
-    updateUI();
-  }
+function spawnDamage(x,y,val) {
+  let d = document.createElement("div");
+  d.className = "damage";
+  d.style.left = x+"px";
+  d.style.top = y+"px";
+  d.textContent = "+"+val;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),800);
 }
 
-function equip(i) {
-  equippedClicker = upgrades[i].img;
-  clicker.src = equippedClicker;
-  updateUI();
-}
+/* ---------------- LOOP ---------------- */
+setInterval(()=>{
+  comboTimer--;
+  if(comboTimer<=0){ combo=0; }
+  document.getElementById("comboBar").value = comboTimer;
+  document.getElementById("combo").textContent = (1+combo/100).toFixed(2)+"x";
+},50);
 
-/* =======================
-   RENDER
-======================= */
-
-const upgradesDiv = document.getElementById("upgrades");
-
-function renderUpgrades() {
-  upgradesDiv.innerHTML = "";
-  upgrades.forEach((u,i)=>{
-    const div = document.createElement("div");
-    div.className = "upgrade" + (equippedClicker === u.img ? " equipped" : "");
-
-    div.innerHTML = `
-      <img src="${u.img}" class="main">
-      <h3>${u.name}</h3>
-      <p>+${u.cps} CPS</p>
-      <p>Owned: ${u.count}</p>
-      <button class="buy" onclick="buy(${i})" ${clicks < u.cost ? "disabled" : ""}>
-        Buy (${format(u.cost)})
-      </button>
-      ${u.count > 0 ? `<button class="equip" onclick="equip(${i})">Equip</button>` : ""}
-    `;
-    upgradesDiv.appendChild(div);
+/* ---------------- SHOP ---------------- */
+function buildShop(){
+  let s = document.getElementById("shop");
+  s.innerHTML="<h3>Swords</h3>";
+  swords.forEach(sw=>{
+    let d=document.createElement("div");
+    d.className="item";
+    d.innerHTML=`${sw.icon} ${sw.name} (${sw.dmg})<button>${sw.price}</button>`;
+    d.onclick=()=>{
+      if(coins>=sw.price){
+        coins-=sw.price;
+        sword=sw;
+        document.getElementById("cursor").textContent=sw.icon;
+        updateUI();
+      }
+    };
+    s.appendChild(d);
   });
 }
 
-function updateUI() {
-  document.getElementById("clicks").textContent = format(clicks);
-  document.getElementById("cps").textContent = format(getCPS());
-  renderUpgrades();
+/* ---------------- SAVE ---------------- */
+function saveGame(){
+  localStorage.setItem("clickerSave",JSON.stringify({coins,totalDamage,sword:sword.name}));
+  alert("Saved!");
 }
 
-/* =======================
-   IMPOSSIBLE JUMP DETECTOR
-======================= */
+function loadGame(){
+  let s=JSON.parse(localStorage.getItem("clickerSave"));
+  if(!s)return;
+  coins=s.coins;
+  totalDamage=s.totalDamage;
+  sword=swords.find(x=>x.name===s.sword)||swords[0];
+}
 
-let lastClicks = 0;
-let lastTime = Date.now();
+function updateUI(){
+  document.getElementById("coins").textContent=coins;
+  document.getElementById("total").textContent=totalDamage;
+  document.getElementById("dpc").textContent=sword.dmg;
+}
 
-setInterval(() => {
-  const now = Date.now();
-  const elapsed = (now - lastTime) / 1000;
+/* ---------------- CURSOR ---------------- */
+document.addEventListener("mousemove",e=>{
+  let c=document.getElementById("cursor");
+  c.style.left=e.clientX+"px";
+  c.style.top=e.clientY+"px";
+});
 
-  const maxGain = getCPS() * elapsed + 15;
-  const actualGain = clicks - lastClicks;
-
-  if (actualGain > maxGain + 1) {
-    HARD_RESET();
-  }
-
-  lastClicks = clicks;
-  lastTime = now;
-}, 250);
-
-/* =======================
-   CPS TICK
-======================= */
-
-setInterval(() => {
-  clicks += getCPS();
-  updateUI();
-}, 1000);
-
+/* INIT */
+loadGame();
+buildShop();
 updateUI();
+moveCharacter();
 </script>
 
 </body>
