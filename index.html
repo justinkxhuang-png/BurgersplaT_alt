@@ -16,10 +16,10 @@ body{
  cursor:none;
 }
 
-/* TOP HUD - INLINE */
+/* TOP HUD */
 #top{
  display:flex;
- justify-content:space-around;
+ justify-content:space-between;
  align-items:center;
  padding:8px 16px;
  background:linear-gradient(90deg,#071b2f,#02060c);
@@ -63,7 +63,7 @@ body{
  top:0;
  height:100vh;
 }
-#center{flex:1;position:relative;}
+#center{flex:1;position:relative; display:flex; justify-content:center; align-items:center;}
 
 /* LEFT */
 #left{font-size:20px;text-align:center;}
@@ -204,8 +204,8 @@ body{
 <body>
 
 <div id="top">
+ <div class="topItem">Title: <span id="achievementTitle">No Title</span></div>
  <div class="topItem">TOTAL DAMAGE: <span id="total">0</span></div>
- <div class="topItem">DAMAGE/CLICK: <span id="dpc">1</span></div>
  <div class="topItem">COMBO: <span id="combo">x1</span>
   <div id="comboBarContainer"><div id="comboBar"></div></div>
  </div>
@@ -276,10 +276,10 @@ let unlockedSwords=saveData.us||["Wooden Sword"];
 let unlockedSkins=saveData.uk||["Default"];
 let unlockedTitles=saveData.ut||[];
 let combo=0,comboTimer=0;
+let currentTitle="No Title";
 
 // ELEMENTS
 const totalEl=document.getElementById("total");
-const dpcEl=document.getElementById("dpc");
 const swordDiv=document.getElementById("swordDiv");
 const skinDiv=document.getElementById("skinDiv");
 const character=document.getElementById("character");
@@ -287,6 +287,7 @@ const achievementsList=document.getElementById("achievementsList");
 const comboEl=document.getElementById("combo");
 const comboBar=document.getElementById("comboBar");
 const comboBarContainer=document.getElementById("comboBarContainer");
+const achievementTitleEl=document.getElementById("achievementTitle");
 
 // CLICK
 character.onclick=e=>{
@@ -319,7 +320,12 @@ function achievementPopup(name){
  p.classList.add("show");
  setTimeout(()=>p.classList.remove("show"),2500);
  const elem=document.querySelector(`#achievementsList div[data-name="${name}"]`);
- if(elem){ elem.classList.remove("locked-achievement"); elem.classList.add("unlocked-achievement"); }
+ if(elem){ elem.classList.remove("locked-achievement"); elem.classList.add("unlocked-achievement"); updateTitle(name); }
+}
+
+function updateTitle(name){
+ currentTitle=name;
+ achievementTitleEl.textContent=currentTitle;
 }
 
 function checkAchievements(){
@@ -371,11 +377,11 @@ function build(){
  });
 }
 
-function buySword(n){ let sw=swords.find(x=>x.n===n); if(unlockedSwords.includes(n)){sword=sw;return;} let cost=sw.p*5; if(total>=cost){total-=cost; unlockedSwords.push(n); sword=sw; build(); update();}}
+function buySword(n){ let sw=swords.find(x=>x.n===n); if(unlockedSwords.includes(n)){sword=sw; return;} let cost=sw.p*5; if(total>=cost){total-=cost; unlockedSwords.push(n); sword=sw; build(); update();}}
 function buySkin(n){ let sk=skins.find(x=>x.n===n); if(unlockedSkins.includes(n)){skin=sk; character.src=sk.img; return;} let cost=sk.p*5; if(total>=cost){total-=cost; unlockedSkins.push(sk.n); skin=sk; character.src=sk.img; build(); update();}}
 
 function tab(id,b){ swordDiv.style.display="none"; skinDiv.style.display="none"; document.getElementById(id).style.display="block"; document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active")); b.classList.add("active");}
-function update(){ totalEl.textContent=total; dpcEl.textContent=sword.d+(skin.d||0); build();}
+function update(){ totalEl.textContent=total; build();}
 function save(){ localStorage.setItem("save",JSON.stringify({ total,us:unlockedSwords,uk:unlockedSkins,ut:unlockedTitles })); alert("Saved!");}
 
 const cursor=document.getElementById("cursor");
