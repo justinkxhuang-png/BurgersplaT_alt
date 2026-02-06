@@ -52,6 +52,12 @@ body{
 
 /* LEFT */
 #left{font-size:24px;text-align:center;}
+#achievementsHeader{
+ font-size:48px; /* BIGGER */
+ font-weight:800;
+ margin-bottom:16px;
+ color:#35e3ff;
+}
 #achievementsList div{
  margin-top:16px;
  font-weight:800;
@@ -191,7 +197,8 @@ body{
 
 <div id="game">
  <div id="left">
-  ACHIEVEMENTS:<div id="achievementsList"></div>
+  <div id="achievementsHeader">ACHIEVEMENTS:</div>
+  <div id="achievementsList"></div>
  </div>
 
  <div id="center">
@@ -325,10 +332,11 @@ function checkAchievements(){
     div.dataset.name=a.n;
     div.className = unlockedTitles.includes(a.n) ? "unlocked-achievement" : "locked-achievement";
     div.onclick=()=>{
-      // Remove any other descs
-      const allDesc=document.querySelectorAll(".achievement-desc");
-      allDesc.forEach(d=>d.remove());
-      if(!div.nextElementSibling || !div.nextElementSibling.classList.contains("achievement-desc")){
+      if(div.nextElementSibling && div.nextElementSibling.classList.contains("achievement-desc")){
+        div.nextElementSibling.remove(); // toggle off
+      } else {
+        const allDesc=document.querySelectorAll(".achievement-desc");
+        allDesc.forEach(d=>d.remove());
         const desc=document.createElement("div");
         desc.className="achievement-desc";
         desc.textContent=a.desc;
@@ -391,7 +399,7 @@ function buySword(n){
 function buySkin(n){
  let sk=skins.find(x=>x.n===n);
  if(unlockedSkins.includes(n)){skin=sk;character.src=sk.img;return;}
- if(total>=sk.p){unlockedSkins.push(n);skin=sk;character.src=sk.img;build();}
+ if(total>=sk.p){unlockedSkins.push(sk.n);skin=sk;character.src=sk.img;build();}
 }
 
 /* TABS */
