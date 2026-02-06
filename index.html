@@ -25,9 +25,24 @@ body{
 }
 #top div{
  font-size:36px;
- margin:8px 0;
+ margin:6px 0;
  color:#35e3ff;
  font-weight:800;
+}
+#comboBarContainer{
+ width:200px;
+ height:18px;
+ background:#0f2238;
+ border-radius:12px;
+ margin:6px auto;
+ overflow:hidden;
+ display:none;
+}
+#comboBar{
+ height:100%;
+ background:limegreen;
+ width:0%;
+ transition:width 0.1s linear;
 }
 
 /* LAYOUT */
@@ -36,13 +51,16 @@ body{
 #center{flex:1;position:relative;}
 
 /* LEFT */
-#left{font-size:24px;text-align:center;}
+#left{font-size:20px;text-align:center;}
 #achievementsList div{
  margin-top:6px;
  font-weight:800;
+ cursor:pointer;
 }
 .locked-achievement{color:grey;}
 .unlocked-achievement{color:limegreen;}
+#achievementDesc{margin-top:8px;font-size:16px;color:#35e3ff;}
+
 /* TABS */
 .tabs button{
  width:33.33%;
@@ -84,10 +102,7 @@ body{
  font-family:inherit;
  cursor:pointer;
 }
-.locked{
- opacity:0.4;
- pointer-events:none;
-}
+.item button.buyable{background:white;color:black;}
 
 /* RARITIES */
 .common{border-color:#35e3ff;}
@@ -164,11 +179,14 @@ body{
 <div id="top">
  <div>TOTAL DAMAGE: <span id="total">0</span></div>
  <div>DAMAGE / CLICK: <span id="dpc">1</span></div>
+ <div>COMBO: <span id="combo">x1.00</span></div>
+ <div id="comboBarContainer"><div id="comboBar"></div></div>
 </div>
 
 <div id="game">
  <div id="left">
   ACHIEVEMENTS:<div id="achievementsList"></div>
+  <div id="achievementDesc"></div>
  </div>
 
  <div id="center">
@@ -209,17 +227,20 @@ const skins=[
  {n:"Grade 3 Pianist",img:"Wenyao.png",p:2500,d:50,r:"rare"},
  {n:"Entrepreneur",img:"Yicheng_3.png",p:10000,d:250,r:"mythic"},
  {n:"The Thinker",img:"Yicheng_5.png",p:50000,cps:999,r:"mythic"},
- {n:"Ascended to Heaven",img:"Yicheng.png",p:150000,cps:1500,r:"legendary"}, // updated image
+ {n:"Ascended to Heaven",img:"Yicheng.png",p:150000,cps:1500,r:"legendary"},
  {n:"Ben Lee",img:"Ben.png",p:500000,r:"secret",secret:true},
  {n:"Amare",img:"Amare.png",p:1000000,r:"secret",secret:true}
 ];
 
 const achievements=[
- {n:"SAVAGE",c:()=>total>=10000},
- {n:"RELENTLESS",c:()=>total>=100000},
- {n:"MASACRE",c:()=>total>=1000000},
- {n:"THE STRONGEST",c:()=>total>=10000000},
- {n:"???",c:()=>total>=100000000,unlock:"THE END???"}
+ {n:"SAVAGE",desc:"Reach 10,000 total damage",c:()=>total>=10000},
+ {n:"RELENTLESS",desc:"Reach 100,000 total damage",c:()=>total>=100000},
+ {n:"MASACRE",desc:"Reach 1,000,000 total damage",c:()=>total>=1000000},
+ {n:"THE STRONGEST",desc:"Reach 10,000,000 total damage",c:()=>total>=10000000},
+ {n:"???",desc:"Reach 100,000,000 total damage",c:()=>total>=100000000,unlock:"THE END???"},
+ {n:"SWORDSMAN",desc:"Unlock all swords",c:()=>unlockedSwords.length===swords.length},
+ {n:"MASTERMIND",desc:"Unlock all skins",c:()=>unlockedSkins.length===skins.length},
+ {n:"COLLECTOR",desc:"Unlock all swords and skins",c:()=>unlockedSwords.length===swords.length && unlockedSkins.length===skins.length}
 ];
 
 /* STATE */
@@ -229,6 +250,7 @@ let sword=swords[0],skin=skins[0];
 let unlockedSwords=saveData.us||["Wooden Sword"];
 let unlockedSkins=saveData.uk||["Default"];
 let unlockedTitles=saveData.ut||[];
+let combo=0,comboTimer=0;
 
 /* ELEMENTS */
 const totalEl=document.getElementById("total");
@@ -237,14 +259,33 @@ const swordDiv=document.getElementById("swordDiv");
 const skinDiv=document.getElementById("skinDiv");
 const character=document.getElementById("character");
 const achievementsList=document.getElementById("achievementsList");
+const achievementDesc=document.getElementById("achievementDesc");
+const comboEl=document.getElementById("combo");
+const comboBarContainer=document.getElementById("comboBarContainer");
+const comboBar=document.getElementById("comboBar");
 
 /* CLICK */
 character.onclick=e=>{
- let dmg=Math.floor(sword.d+(skin.d||0));
+ combo++; comboTimer=60;
+ let dmg=Math.floor(sword.d+(skin.d||0)*(1+combo/100));
  total+=dmg;
  float(e.clientX,e.clientY,"+"+dmg);
  move(); update(); checkAchievements();
 };
+
+/* COMBO TIMER */
+setInterval(()=>{
+ if(comboTimer>0){
+  comboTimer--;
+  comboEl.textContent="x"+(1+combo/100).toFixed(2);
+  comboBarContainer.style.display="block";
+  comboBar.style.width=Math.min((comboTimer/60)*100,100)+"%";
+ } else {
+  combo=0;
+  comboBarContainer.style.display="none";
+  comboEl.textContent="x1.00";
+ }
+},50);
 
 function move(){
  character.style.left=Math.random()*75+"%";
@@ -279,6 +320,7 @@ function checkAchievements(){
     div.textContent=a.n;
     div.dataset.name=a.n;
     div.className = unlockedTitles.includes(a.n) ? "unlocked-achievement" : "locked-achievement";
+    div.onclick=()=>achievementDesc.textContent = (achievementDesc.textContent===a.desc?"":a.desc);
     achievementsList.appendChild(div);
   }
   if(a.c() && !unlockedTitles.includes(a.n)){
@@ -304,8 +346,7 @@ function build(){
     <b>${sw.secret&&!owned?"???":sw.n}</b><br>
     DMG: ${sw.secret&&!owned?"???":sw.d}<br>
     Cost: ${sw.p} DAMAGE
-    <button ${!owned&&total<sw.p?'class="locked"':''}
-     onclick="buySword('${sw.n}')">${owned?"Equip":"Buy"}</button>
+    <button class="${(!owned&&total>=sw.p?'buyable':'locked')}" onclick="buySword('${sw.n}')">${owned?"Equip":"Buy"}</button>
    </div>
   </div>`;
  });
@@ -320,8 +361,7 @@ function build(){
     <b>${sk.secret&&!owned?"???":sk.n}</b><br>
     DMG/CPS: ${sk.secret&&!owned?"???":(sk.cps||sk.d)}<br>
     Cost: ${sk.p} DAMAGE
-    <button ${!owned&&total<sk.p?'class="locked"':''}
-     onclick="buySkin('${sk.n}')">${owned?"Equip":"Buy"}</button>
+    <button class="${(!owned&&total>=sk.p?'buyable':'locked')}" onclick="buySkin('${sk.n}')">${owned?"Equip":"Buy"}</button>
    </div>
   </div>`;
  });
@@ -353,6 +393,7 @@ function tab(id,b){
 function update(){
  totalEl.textContent=total;
  dpcEl.textContent=sword.d+(skin.d||0);
+ build();
 }
 
 /* SAVE */
