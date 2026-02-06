@@ -4,39 +4,42 @@
 <meta charset="UTF-8">
 <title>Clicker Combat</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
 body {
   margin: 0;
   background: radial-gradient(circle at top, #0b1a2f, #04070e);
-  font-family: "Segoe UI", sans-serif;
+  font-family: "Orbitron", sans-serif;
   color: #e6f1ff;
   overflow: hidden;
   cursor: none;
 }
 
+/* ---------- TOP ---------- */
 #top {
-  padding: 10px;
+  padding: 12px;
   background: linear-gradient(90deg, #071b2f, #02060c);
-  box-shadow: 0 0 20px #000;
   text-align: center;
+  box-shadow: 0 0 25px #000;
 }
 
 #top div {
   font-size: 18px;
   margin: 4px 0;
   color: #35e3ff;
-  font-weight: bold;
 }
 
+/* ---------- LAYOUT ---------- */
 #game {
   display: flex;
-  height: calc(100vh - 90px);
+  height: calc(100vh - 100px);
 }
 
 #left, #right {
-  width: 300px;
+  width: 320px;
   background: #0d1626;
-  padding: 10px;
+  padding: 12px;
   overflow-y: auto;
 }
 
@@ -45,9 +48,11 @@ body {
   position: relative;
 }
 
+/* ---------- TABS ---------- */
 .tabs button {
-  width: 33%;
-  padding: 10px;
+  width: 25%;
+  padding: 14px;
+  font-size: 14px;
   background: #0f2238;
   border: none;
   color: white;
@@ -59,51 +64,71 @@ body {
   font-weight: bold;
 }
 
+/* ---------- ITEMS ---------- */
 .item {
+  display: flex;
+  gap: 10px;
   background: #091728;
-  margin-bottom: 10px;
-  padding: 12px;
-  border-left: 6px solid #35e3ff;
-  font-size: 18px;
+  margin-bottom: 12px;
+  padding: 10px;
+  border-left: 6px solid;
+}
+
+.item img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
 }
 
 .item button {
-  margin-top: 8px;
+  margin-top: 6px;
   width: 100%;
-  padding: 8px;
-  font-size: 16px;
+  padding: 6px;
   cursor: pointer;
+  font-family: inherit;
 }
 
+/* ---------- RARITIES ---------- */
+.common { border-color:#35e3ff; }
+.rare { border-color:gold; }
+.epic { border-color:purple; }
+.mythic { border-color:red; }
+.legendary { border-color:gold; }
+
+.secret {
+  border-color: transparent;
+  background:
+    linear-gradient(#091728,#091728) padding-box,
+    linear-gradient(90deg,red,orange,yellow,green,cyan,blue,violet) border-box;
+  border-left: 6px solid transparent;
+  animation: rainbow 2s linear infinite;
+}
+
+@keyframes rainbow {
+  to { filter: hue-rotate(360deg); }
+}
+
+/* ---------- CHARACTER ---------- */
 #character {
   position: absolute;
-  width: 160px;
+  width: 170px;
   cursor: pointer;
-  user-select: none;
 }
 
-.damage {
+/* ---------- FLOATING TEXT ---------- */
+.float {
   position: absolute;
-  font-size: 26px;
+  font-size: 28px;
   font-weight: bold;
-  color: gold;
   pointer-events: none;
-  animation: float 0.9s ease-out forwards;
-}
-
-.comboText {
-  position: absolute;
-  font-size: 32px;
-  font-weight: 900;
-  color: #ff4;
-  pointer-events: none;
-  animation: float 0.9s ease-out forwards;
+  animation: float 0.9s forwards;
 }
 
 @keyframes float {
   to { transform: translateY(-50px); opacity: 0; }
 }
 
+/* ---------- CURSOR ---------- */
 #cursor {
   position: fixed;
   pointer-events: none;
@@ -122,8 +147,9 @@ body {
 </div>
 
 <div id="game">
+
   <div id="left">
-    <p><b>Coins:</b> <span id="coins">0</span></p>
+    Coins: <b id="coins">0</b>
     <progress id="comboBar" max="100" value="0"></progress>
   </div>
 
@@ -134,163 +160,170 @@ body {
   <div id="right">
     <div class="tabs">
       <button class="active" onclick="showTab('shop')">SHOP</button>
+      <button onclick="showTab('characters')">CHARACTERS</button>
       <button onclick="showTab('stats')">STATS</button>
       <button onclick="saveGame()">SAVE</button>
     </div>
 
     <div id="shop"></div>
+    <div id="characters" style="display:none"></div>
     <div id="stats" style="display:none"></div>
   </div>
+
 </div>
 
 <div id="cursor">🪵</div>
 
 <script>
-/* ---------------- DATA ---------------- */
-const swords = [
- {name:"Wooden Sword", dmg:1, price:0, icon:"🪵"},
- {name:"Iron Sword", dmg:10, price:300, icon:"⚔️"},
- {name:"Gold Sword", dmg:35, price:900, icon:"🟡"},
- {name:"Diamond Sword", dmg:70, price:4000, icon:"💎"},
- {name:"Amethyst Sword", dmg:150, price:10000, icon:"🔮"},
- {name:"Tungsten Sword", dmg:400, price:40000, icon:"🔩"},
- {name:"Yicheng Sword", dmg:999, price:100000, icon:"❓"}
+/* ---------- DATA ---------- */
+const swords=[
+ {name:"Wooden Sword",dmg:1,price:0,icon:"🪵",rarity:"common"},
+ {name:"Iron Sword",dmg:10,price:300,icon:"⚔️",rarity:"rare"},
+ {name:"Gold Sword",dmg:35,price:900,icon:"🟡",rarity:"epic"},
+ {name:"Diamond Sword",dmg:70,price:4000,icon:"💎",rarity:"mythic"},
+ {name:"Amethyst Sword",dmg:150,price:10000,icon:"🔮",rarity:"legendary"},
+ {name:"Tungsten Sword",dmg:400,price:40000,icon:"🔩",rarity:"legendary"},
+ {name:"???",dmg:999,price:100000,icon:"❓",rarity:"secret",secret:true}
 ];
 
-const characters = [
- {name:"Forehead", img:"Yicheng_4.png", cost:0},
- {name:"Grade 3 Pianist", img:"Yicheng_5.png", cost:1000},
- {name:"Entrepreneur", img:"Yicheng_5.png", cost:10000},
- {name:"The Thinker", img:"Yicheng_5.png", cost:50000},
- {name:"Ascended to Heaven", img:"Yicheng_5.png", cost:150000},
- {name:"???", img:"Ben.png", cost:500000, secret:true},
- {name:"???", img:"Amare.png", cost:1000000, secret:true}
+const characters=[
+ {name:"Default",img:"Yicheng_4.png",cost:0,rarity:"common"},
+ {name:"Failure",img:"Yicheng_2.png",cost:0,rarity:"rare"},
+ {name:"The Thinker",img:"Yicheng_5.png",cost:50000,rarity:"mythic"},
+ {name:"Ascended to Heaven",img:"Yicheng_5.png",cost:150000,rarity:"legendary"},
+ {name:"???",img:"Ben.png",cost:500000,rarity:"secret",secret:true},
+ {name:"???",img:"Amare.png",cost:1000000,rarity:"secret",secret:true}
 ];
 
-/* ---------------- STATE ---------------- */
-let coins=0, totalDamage=0;
+/* ---------- STATE ---------- */
+let coins=0,totalDamage=0,combo=0,comboTimer=0;
 let sword=swords[0];
 let character=characters[0];
-let combo=0, comboTimer=0;
 
-/* ---------------- CLICK ---------------- */
 const charEl=document.getElementById("character");
+
+/* ---------- CLICK ---------- */
 charEl.onclick=e=>{
-  combo++;
-  comboTimer=100;
-  let mult=1+combo/100;
-  let dmg=Math.floor(sword.dmg*mult);
-
-  coins+=dmg;
-  totalDamage+=dmg;
-
-  spawnText(e.clientX,e.clientY,"+"+dmg,"damage");
-  spawnText(e.clientX+20,e.clientY-10,"x"+mult.toFixed(2),"comboText");
-
-  moveCharacter();
-  updateUI();
+ combo++;
+ comboTimer=100;
+ let mult=1+combo/100;
+ let dmg=Math.floor(sword.dmg*mult);
+ coins+=dmg;
+ totalDamage+=dmg;
+ spawn(e.clientX,e.clientY,"+"+dmg);
+ spawn(e.clientX+20,e.clientY-10,"x"+mult.toFixed(2));
+ moveChar();
+ updateUI();
 };
 
-/* ---------------- EFFECTS ---------------- */
-function spawnText(x,y,text,cls){
-  let d=document.createElement("div");
-  d.className=cls;
-  d.style.left=x+"px";
-  d.style.top=y+"px";
-  d.textContent=text;
-  document.body.appendChild(d);
-  setTimeout(()=>d.remove(),900);
+function spawn(x,y,t){
+ let d=document.createElement("div");
+ d.className="float";
+ d.style.left=x+"px";
+ d.style.top=y+"px";
+ d.textContent=t;
+ document.body.appendChild(d);
+ setTimeout(()=>d.remove(),900);
 }
 
-function moveCharacter(){
-  charEl.style.left=Math.random()*75+"%";
-  charEl.style.top=Math.random()*65+"%";
+function moveChar(){
+ charEl.style.left=Math.random()*75+"%";
+ charEl.style.top=Math.random()*65+"%";
 }
 
-/* ---------------- LOOP ---------------- */
+/* ---------- LOOP ---------- */
 setInterval(()=>{
-  comboTimer--;
-  if(comboTimer<=0) combo=0;
-  document.getElementById("comboBar").value=comboTimer;
-  document.getElementById("combo").textContent="x"+(1+combo/100).toFixed(2);
+ comboTimer--;
+ if(comboTimer<=0) combo=0;
+ document.getElementById("combo").textContent="x"+(1+combo/100).toFixed(2);
+ document.getElementById("comboBar").value=comboTimer;
 },50);
 
-/* ---------------- SHOP ---------------- */
+/* ---------- BUILD UI ---------- */
 function buildShop(){
-  let s=document.getElementById("shop");
-  s.innerHTML="<h3>Swords</h3>";
-  swords.forEach(sw=>{
-    let d=document.createElement("div");
-    d.className="item";
-    d.innerHTML=`<b>${sw.icon} ${sw.name}</b><br>DMG: ${sw.dmg}<br>Cost: ${sw.price}
-    <button>Equip</button>`;
-    d.onclick=()=>{
-      if(coins>=sw.price){
-        sword=sw;
-        document.getElementById("cursor").textContent=sw.icon;
-        updateUI();
-      }
-    };
-    s.appendChild(d);
-  });
-
-  s.innerHTML+="<h3>Characters</h3>";
-  characters.forEach(c=>{
-    let d=document.createElement("div");
-    d.className="item";
-    d.innerHTML=`<b>${c.secret?"???":c.name}</b><br>Cost: ${c.cost}
-    <button>Equip</button>`;
-    d.onclick=()=>{
-      if(coins>=c.cost){
-        character=c;
-        charEl.src=c.img;
-      }
-    };
-    s.appendChild(d);
-  });
+ let s=document.getElementById("shop");
+ s.innerHTML="";
+ swords.forEach(sw=>{
+  let d=document.createElement("div");
+  d.className="item "+sw.rarity;
+  d.innerHTML=`
+   <div>
+    <b>${sw.secret?"???":sw.name}</b><br>
+    DMG: ${sw.secret?"???":sw.dmg}<br>
+    Cost: ${sw.price}
+    <button>Equip</button>
+   </div>`;
+  d.onclick=()=>{
+   if(coins>=sw.price){
+    sword=sw;
+    document.getElementById("cursor").textContent=sw.icon;
+   }
+  };
+  s.appendChild(d);
+ });
 }
 
-/* ---------------- STATS ---------------- */
+function buildCharacters(){
+ let c=document.getElementById("characters");
+ c.innerHTML="";
+ characters.forEach(ch=>{
+  let d=document.createElement("div");
+  d.className="item "+ch.rarity;
+  d.innerHTML=`
+   <img src="${ch.img}" style="${ch.secret?'filter:brightness(0);':''}">
+   <div>
+    <b>${ch.secret?"???":ch.name}</b><br>
+    Cost: ${ch.cost}
+    <button>Equip</button>
+   </div>`;
+  d.onclick=()=>{
+   if(coins>=ch.cost){
+    character=ch;
+    charEl.src=ch.img;
+   }
+  };
+  c.appendChild(d);
+ });
+}
+
 function buildStats(){
-  document.getElementById("stats").innerHTML=`
-    <p>Total Damage: ${totalDamage}</p>
-    <p>Coins: ${coins}</p>
-    <p>Damage / Click: ${sword.dmg}</p>
-    <p>Equipped Sword: ${sword.name}</p>
-    <p>Equipped Character: ${character.name}</p>
-  `;
+ document.getElementById("stats").innerHTML=`
+  <p>Total Damage: ${totalDamage}</p>
+  <p>Coins: ${coins}</p>
+  <p>Damage / Click: ${sword.dmg}</p>
+  <p>Sword: ${sword.secret?"???":sword.name}</p>
+  <p>Character: ${character.secret?"???":character.name}</p>`;
 }
 
-function showTab(tab){
-  document.getElementById("shop").style.display=tab==="shop"?"block":"none";
-  document.getElementById("stats").style.display=tab==="stats"?"block":"none";
-  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
-  event.target.classList.add("active");
-  if(tab==="stats") buildStats();
+function showTab(t){
+ ["shop","characters","stats"].forEach(x=>{
+  document.getElementById(x).style.display=(x===t)?"block":"none";
+ });
+ buildStats();
 }
 
-/* ---------------- SAVE ---------------- */
+/* ---------- SAVE ---------- */
 function saveGame(){
-  localStorage.setItem("clickerSave",JSON.stringify({coins,totalDamage,sword:sword.name,character:character.name}));
-  alert("Saved!");
+ localStorage.setItem("save",JSON.stringify({coins,totalDamage}));
+ alert("Saved!");
 }
 
-/* ---------------- CURSOR ---------------- */
+/* ---------- CURSOR ---------- */
 document.addEventListener("mousemove",e=>{
-  let c=document.getElementById("cursor");
-  c.style.left=e.clientX+"px";
-  c.style.top=e.clientY+"px";
+ let c=document.getElementById("cursor");
+ c.style.left=e.clientX+"px";
+ c.style.top=e.clientY+"px";
 });
 
 /* INIT */
 buildShop();
-moveCharacter();
+buildCharacters();
+moveChar();
 updateUI();
 function updateUI(){
-  coins=Math.floor(coins);
-  document.getElementById("coins").textContent=coins;
-  document.getElementById("total").textContent=totalDamage;
-  document.getElementById("dpc").textContent=sword.dmg;
+ document.getElementById("coins").textContent=coins;
+ document.getElementById("total").textContent=totalDamage;
+ document.getElementById("dpc").textContent=sword.dmg;
 }
 </script>
 
