@@ -2,203 +2,106 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Clicker Combat</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&display=swap" rel="stylesheet">
+<title>Clicker Game</title>
 
 <style>
+*{box-sizing:border-box}
 body{
- margin:0;
- background:radial-gradient(circle at top,#0b1a2f,#04070e);
- font-family:"Orbitron",sans-serif;
- color:#e6f1ff;
- overflow:hidden;
- cursor:none;
+  margin:0;
+  background:#111;
+  color:#fff;
+  font-family:Segoe UI,Arial;
+  overflow:hidden;
 }
 
-/* TOP HUD */
+/* TOP BAR */
 #top{
- display:flex;
- justify-content:space-between;
- align-items:center;
- padding:8px 16px;
- background:linear-gradient(90deg,#071b2f,#02060c);
- box-shadow:0 0 30px #000;
- font-size:20px;
- flex-wrap:wrap;
+  height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 12px;
+  background:#1b1b1b;
+  border-bottom:2px solid #333;
 }
-.topItem{
- display:flex;
- align-items:center;
- gap:6px;
- color:#35e3ff;
- font-weight:800;
-}
-#comboBarContainer{
- width:100px;
- height:12px;
- background:#0f2238;
- border-radius:12px;
- overflow:hidden;
- display:block;
-}
+#titleBox{font-size:18px;font-weight:700}
+#total{font-size:20px;font-weight:800}
+#comboBox{display:flex;align-items:center;gap:6px}
 #comboBar{
- height:100%;
- background:limegreen;
- width:0%;
- transition:width 0.1s linear;
+  width:80px;height:10px;
+  background:#333;border-radius:6px;
+  overflow:hidden
+}
+#comboFill{
+  height:100%;width:0%;
+  background:#0f0
 }
 
 /* LAYOUT */
 #game{
- display:flex;
- height:100vh;
+  display:flex;
+  height:calc(100vh - 60px);
 }
-#left,#right{
- width:320px;
- background:#0d1626;
- padding:14px;
- overflow-y:auto;
- position:relative;
- top:0;
- height:100vh;
- box-sizing:border-box;
+.tab{
+  width:300px;
+  background:#181818;
+  border-right:2px solid #333;
+  padding:10px;
+  overflow-y:auto;
 }
-#center{flex:1;position:relative; display:flex; justify-content:center; align-items:center;}
-
-/* LEFT */
-#left{font-size:20px;text-align:center;}
-#achievementsHeader{
- font-size:22px;
- font-weight:800;
- margin-bottom:12px;
- color:#35e3ff;
-}
-#achievementsList div{
- margin-top:12px;
- font-weight:800;
- cursor:pointer;
- font-size:18px;
-}
-.achievement-desc{
- font-size:16px;
- color:#35e3ff;
- margin-top:2px;
- margin-bottom:10px;
-}
-.locked-achievement{color:grey;}
-.unlocked-achievement{color:limegreen;}
-
-/* TABS */
-.tabs button{
- width:33.33%;
- padding:14px;
- font-size:16px;
- background:#0f2238;
- border:none;
- color:white;
- cursor:pointer;
-}
-.tabs button.active{
- background:#35e3ff;
- color:black;
- font-weight:800;
+.right{border-right:none;border-left:2px solid #333}
+#center{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
-/* CONTENT */
-#swordDiv,#skinDiv{
- max-height:calc(100% - 50px);
- overflow-y:auto;
- padding-bottom:20px; /* extra space for last items */
+/* CLICK AREA */
+#clicker{
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  background:#222;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
 }
-
-/* ITEMS */
-.item{
- display:flex;
- gap:12px;
- background:#091728;
- margin-bottom:12px;
- padding:12px;
- border-left:8px solid;
-}
-.item img{
- width:72px;height:72px;object-fit:cover;
-}
-.item button{
- margin-top:6px;
- width:100%;
- padding:6px;
- font-family:inherit;
- cursor:pointer;
-}
-.item button.buyable{background:white;color:black;}
-
-/* RARITIES */
-.common{border-color:#35e3ff;}
-.rare{border-color:gold;}
-.epic{border-color:purple;}
-.mythic{border-color:red;}
-.legendary{border-color:hotpink;}
-.secret{
- border-color:transparent;
- background:
-  linear-gradient(#091728,#091728) padding-box,
-  linear-gradient(90deg,red,orange,yellow,green,cyan,blue,violet) border-box;
- border-left:8px solid transparent;
- animation:rainbow 2s linear infinite;
-}
-@keyframes rainbow{to{filter:hue-rotate(360deg);}}
-
-/* CHARACTER */
-#character{
- position:absolute;
- width:180px;
- cursor:pointer;
- transition: left 0.2s ease, top 0.2s ease;
-}
-
-/* FLOAT */
-.float{
- position:absolute;
- font-size:28px;
- font-weight:800;
- pointer-events:none;
- animation:float 0.9s forwards;
- color: #35e3ff;
-}
-@keyframes float{
- to{transform:translateY(-60px);opacity:0;}
-}
-
-/* CURSOR */
 #cursor{
- position:fixed;
- pointer-events:none;
- width:48px;height:48px;
- transform:translate(-50%,-50%);
+  width:120px;
 }
 
-/* ACHIEVEMENT POPUP */
-#achievementPopup{
- position:fixed;
- bottom:40px;
- left:50%;
- transform:translateX(-50%) scale(0.8);
- background:linear-gradient(90deg,#35e3ff,#8af0ff);
- color:#000;
- padding:16px 28px;
- border-radius:12px;
- font-size:20px;
- font-weight:800;
- box-shadow:0 0 30px #35e3ff;
- opacity:0;
- pointer-events:none;
- transition:0.4s ease;
- z-index:999;
+/* SHOP ITEMS */
+.item{
+  padding:8px;
+  border:2px solid #555;
+  margin-bottom:8px;
+  cursor:pointer;
 }
-#achievementPopup.show{
- opacity:1;
- transform:translateX(-50%) scale(1);
+.item.locked{opacity:.4}
+.item.common{border-color:#aaa}
+.item.rare{border-color:#4af}
+.item.epic{border-color:#c4f}
+
+/* ACHIEVEMENTS */
+#achHeader{
+  font-size:28px;
+  text-align:center;
+  margin-bottom:10px;
+}
+.achievement{
+  text-align:center;
+  font-size:22px;
+  padding:6px;
+  cursor:pointer;
+}
+.achievement.locked{opacity:.4}
+.achievement-desc{
+  text-align:center;
+  font-size:16px;
+  opacity:.8;
+  margin-bottom:8px;
 }
 </style>
 </head>
@@ -206,191 +109,176 @@ body{
 <body>
 
 <div id="top">
- <div class="topItem">Title: <span id="achievementTitle">No Title</span></div>
- <div class="topItem">TOTAL DAMAGE: <span id="total">0</span></div>
- <div class="topItem">COMBO: <span id="combo">x1</span>
-  <div id="comboBarContainer"><div id="comboBar"></div></div>
- </div>
+  <div id="titleBox">Title: <span id="title">No Title</span></div>
+  <div id="total">0</div>
+  <div id="comboBox">
+    Combo: <span id="combo">0</span>
+    <div id="comboBar"><div id="comboFill"></div></div>
+  </div>
 </div>
 
 <div id="game">
- <div id="left">
-  <div id="achievementsHeader">ACHIEVEMENTS:</div>
-  <div id="achievementsList"></div>
- </div>
-
- <div id="center">
-  <img id="character" src="YIcheng_4.png">
- </div>
-
- <div id="right">
-  <div class="tabs">
-   <button onclick="tab('swordDiv',this)" class="active">SWORD</button>
-   <button onclick="tab('skinDiv',this)">SKIN</button>
-   <button onclick="save()">SAVE</button>
+  <div class="tab" id="achievements">
+    <div id="achHeader">ACHIEVEMENTS</div>
   </div>
 
-  <div id="swordDiv"></div>
-  <div id="skinDiv" style="display:none"></div>
- </div>
+  <div id="center">
+    <div id="clicker">
+      <img id="cursor" src="sword.png">
+    </div>
+  </div>
+
+  <div class="tab right">
+    <h2>Swords</h2>
+    <div id="swords"></div>
+    <h2>Skins</h2>
+    <div id="skins"></div>
+  </div>
 </div>
 
-<img id="cursor" src="Wood.webp">
-<div id="achievementPopup"></div>
-
 <script>
-// DATA
-const swords=[{n:"Wooden Sword",d:1,p:0,r:"common",img:"Wood.webp"},
-{n:"Iron Sword",d:10,p:300,r:"rare",img:"Iron.webp"},
-{n:"Gold Sword",d:35,p:900,r:"epic",img:"Gold.png"},
-{n:"Diamond Sword",d:70,p:4000,r:"mythic",img:"Diamond.webp"},
-{n:"Amethyst Sword",d:150,p:10000,r:"legendary",img:"Amethyst.webp"},
-{n:"Tungsten Sword",d:400,p:40000,r:"legendary",img:"Tungsten.webp"},
-{n:"Yicheng Sword",d:999,p:100000,r:"secret",secret:true,img:"Yicheng_6.png"}];
-
-const skins=[{n:"Default",img:"YIcheng_4.png",p:0,d:1,r:"common"},
-{n:"Failure",img:"Yicheng_2.png",p:100,d:5,r:"common"},
-{n:"Forehead",img:"Wenyao_2.png",p:500,d:10,r:"common"},
-{n:"Grade 3 Pianist",img:"Wenyao.png",p:2500,d:50,r:"rare"},
-{n:"Entrepreneur",img:"Yicheng_3.png",p:10000,d:250,r:"mythic"},
-{n:"The Thinker",img:"Yicheng_5.png",p:50000,cps:999,r:"mythic"},
-{n:"Ascended to Heaven",img:"Yicheng.png",p:150000,cps:1500,r:"legendary"},
-{n:"Ben Lee",img:"Ben.png",p:500000,r:"secret",secret:true},
-{n:"Amare",img:"Amare.png",p:1000000,r:"secret",secret:true}];
-
-const achievements=[
- {n:"SWORDSMAN",desc:"Unlock all swords",c:()=>unlockedSwords.length===swords.length},
- {n:"MASTERMIND",desc:"Unlock all skins",c:()=>unlockedSkins.length===skins.length},
- {n:"COLLECTOR",desc:"Unlock all swords and skins",c:()=>unlockedSwords.length===swords.length && unlockedSkins.length===skins.length},
- {n:"COMBOMASTER",desc:"Achieve a combo of 500",c:()=>combo>=500},
- {n:"SAVAGE",desc:"Reach 10,000 total damage",c:()=>total>=10000},
- {n:"RELENTLESS",desc:"Reach 100,000 total damage",c:()=>total>=100000},
- {n:"MASACRE",desc:"Reach 1,000,000 total damage",c:()=>total>=1000000},
- {n:"THE STRONGEST",desc:"Reach 10,000,000 total damage",c:()=>total>=10000000},
- {n:"???",desc:"Reach 100,000,000 total damage",c:()=>total>=100000000,unlock:"THE END???"}
+/* ===== DATA ===== */
+const swords=[
+ {n:"Wood Sword",d:1,p:10,img:"sword.png",r:"common"},
+ {n:"Steel Sword",d:5,p:50,img:"steel.png",r:"rare"},
+ {n:"Ascended to Heaven",d:50,p:500,img:"Yicheng.png",r:"epic"}
 ];
 
-// STATE
-let saveData=JSON.parse(localStorage.getItem("save"))||{};
-let total=saveData.total||0;
-let sword=swords[0],skin=skins[0];
-let unlockedSwords=saveData.us||["Wooden Sword"];
-let unlockedSkins=saveData.uk||["Default"];
-let unlockedTitles=saveData.ut||[];
-let combo=0,comboTimer=0;
+const skins=[
+ {n:"Fire",d:3,p:30},
+ {n:"Shadow",d:7,p:80}
+];
+
+const achievements=[
+ {n:"Swordsman",req:1,desc:"Buy a sword"},
+ {n:"Mastermind",req:1000,desc:"Reach 1,000 damage"},
+ {n:"Collector",req:2,desc:"Own 2 items"},
+ {n:"COMBOMASTER",req:500,desc:"Reach combo 500"}
+];
+
+/* ===== STATE ===== */
+let total=0;
+let combo=0;
+let sword=swords[0];
+let skin={d:0};
+let unlockedSwords=["Wood Sword"];
+let unlockedSkins=[];
+let unlockedTitles=[];
 let currentTitle="No Title";
 
-// ELEMENTS
+/* ===== ELEMENTS ===== */
 const totalEl=document.getElementById("total");
-const swordDiv=document.getElementById("swordDiv");
-const skinDiv=document.getElementById("skinDiv");
-const character=document.getElementById("character");
-const achievementsList=document.getElementById("achievementsList");
 const comboEl=document.getElementById("combo");
-const comboBar=document.getElementById("comboBar");
-const comboBarContainer=document.getElementById("comboBarContainer");
-const achievementTitleEl=document.getElementById("achievementTitle");
+const comboFill=document.getElementById("comboFill");
+const swordBox=document.getElementById("swords");
+const skinBox=document.getElementById("skins");
+const achBox=document.getElementById("achievements");
+const cursor=document.getElementById("cursor");
+const titleEl=document.getElementById("title");
 
-// CLICK
-character.onclick=e=>{
- combo++; comboTimer=60;
- total+=sword.d + (skin.d||0);
- float(e.clientX,e.clientY,"+"+(sword.d+(skin.d||0)));
- move(); update(); checkAchievements();
+/* ===== CLICK ===== */
+document.getElementById("clicker").onclick=()=>{
+  total+=sword.d+(skin.d||0);
+  combo++;
+  update();
+  checkAchievements();
 };
 
-// COMBO TIMER
-setInterval(()=>{
- if(comboTimer>0){
-  comboTimer--;
-  comboEl.textContent="x"+combo;
-  comboBarContainer.style.display="block";
-  comboBar.style.width=Math.min((comboTimer/60)*100,100)+"%";
- } else {
-  combo=0;
-  comboBarContainer.style.display="none";
-  comboEl.textContent="x1";
- }
-},50);
-
-function move(){ character.style.left=Math.random()*75+"%"; character.style.top=Math.random()*65+"%";}
-function float(x,y,t){if(document.querySelectorAll(".float").length>20) return; let d=document.createElement("div"); d.className="float"; d.style.left=x+"px"; d.style.top=y+"px"; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),900);}
-
-function achievementPopup(name){
- let p=document.getElementById("achievementPopup");
- p.textContent="🏆 ACHIEVEMENT UNLOCKED: "+name;
- p.classList.add("show");
- setTimeout(()=>p.classList.remove("show"),2500);
- const elem=document.querySelector(`#achievementsList div[data-name="${name}"]`);
- if(elem){ elem.classList.remove("locked-achievement"); elem.classList.add("unlocked-achievement"); updateTitle(name); }
+/* ===== UI ===== */
+function update(){
+ totalEl.textContent=total;
+ comboEl.textContent=combo;
+ comboFill.style.width=Math.min(combo/5,100)+"%";
+ titleEl.textContent=currentTitle;
 }
 
-function updateTitle(name){
- currentTitle=name;
- achievementTitleEl.textContent=currentTitle;
-}
-
-function checkAchievements(){
- achievements.forEach(a=>{
-  if(!document.querySelector(`#achievementsList div[data-name="${a.n}"]`)){
-    const div=document.createElement("div");
-    div.textContent=a.n;
-    div.dataset.name=a.n;
-    div.className = unlockedTitles.includes(a.n) ? "unlocked-achievement" : "locked-achievement";
-    div.onclick=()=>{
-      if(div.nextElementSibling && div.nextElementSibling.classList.contains("achievement-desc")){
-        div.nextElementSibling.remove();
-      } else {
-        const allDesc=document.querySelectorAll(".achievement-desc");
-        allDesc.forEach(d=>d.remove());
-        const desc=document.createElement("div");
-        desc.className="achievement-desc";
-        desc.textContent=a.desc;
-        div.parentNode.insertBefore(desc,div.nextSibling);
-      }
-    };
-    achievementsList.appendChild(div);
-  }
-  if(a.c() && !unlockedTitles.includes(a.n)){
-    unlockedTitles.push(a.n);
-    achievementPopup(a.n);
-    if(a.unlock){
-      unlockedTitles.push(a.unlock);
-      achievementPopup(a.unlock);
-    }
-  }
- });
-}
-
+/* ===== BUILD SHOPS ===== */
 function build(){
- swordDiv.innerHTML=""; swords.forEach(sw=>{
-  let owned=unlockedSwords.includes(sw.n);
-  swordDiv.innerHTML+=`<div class="item ${sw.r}">
-   <img src="${sw.img}" style="${sw.secret&&!owned?'filter:brightness(0);':''}">
-   <div><b>${sw.secret&&!owned?"???":sw.n}</b><br>DMG: ${sw.secret&&!owned?"???":sw.d}<br>Cost: ${sw.p*5} DAMAGE
-   <button class="${(!owned&&total>=sw.p*5?'buyable':'locked')}" onclick="buySword('${sw.n}')">${owned?"Equip":"Buy"}</button></div></div>`;
+ swordBox.innerHTML="";
+ swords.forEach(s=>{
+  const div=document.createElement("div");
+  div.className="item "+s.r+(unlockedSwords.includes(s.n)?"":" locked");
+  div.textContent=s.n+" (+ "+s.d+") Cost:"+(s.p*5);
+  div.onclick=()=>buySword(s);
+  swordBox.appendChild(div);
  });
- skinDiv.innerHTML=""; skins.forEach(sk=>{
-  let owned=unlockedSkins.includes(sk.n);
-  skinDiv.innerHTML+=`<div class="item ${sk.r}">
-   <img src="${sk.img}" style="${sk.secret&&!owned?'filter:brightness(0);':''}">
-   <div><b>${sk.secret&&!owned?"???":sk.n}</b><br>DMG/CPS: ${sk.secret&&!owned?"???":(sk.cps||sk.d)}<br>Cost: ${sk.p*5} DAMAGE
-   <button class="${(!owned&&total>=sk.p*5?'buyable':'locked')}" onclick="buySkin('${sk.n}')">${owned?"Equip":"Buy"}</button></div></div>`;
+
+ skinBox.innerHTML="";
+ skins.forEach(s=>{
+  const div=document.createElement("div");
+  div.className="item"+(unlockedSkins.includes(s.n)?"":" locked");
+  div.textContent=s.n+" (+ "+s.d+") Cost:"+(s.p*5);
+  div.onclick=()=>buySkin(s);
+  skinBox.appendChild(div);
  });
 }
 
-function buySword(n){ let sw=swords.find(x=>x.n===n); if(unlockedSwords.includes(n)){sword=sw; return;} let cost=sw.p*5; if(total>=cost){total-=cost; unlockedSwords.push(n); sword=sw; build(); update();}}
-function buySkin(n){ let sk=skins.find(x=>x.n===n); if(unlockedSkins.includes(n)){skin=sk; character.src=sk.img; return;} let cost=sk.p*5; if(total>=cost){total-=cost; unlockedSkins.push(sk.n); skin=sk; character.src=sk.img; build(); update();}}
+function buySword(s){
+ if(unlockedSwords.includes(s.n)){
+  sword=s;
+  cursor.src=s.img;
+  build();return;
+ }
+ if(total>=s.p*5){
+  total-=s.p*5;
+  unlockedSwords.push(s.n);
+  sword=s;
+  cursor.src=s.img;
+  build();update();
+ }
+}
 
-function tab(id,b){ swordDiv.style.display="none"; skinDiv.style.display="none"; document.getElementById(id).style.display="block"; document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active")); b.classList.add("active");}
-function update(){ totalEl.textContent=total; build();}
-function save(){ localStorage.setItem("save",JSON.stringify({ total,us:unlockedSwords,uk:unlockedSkins,ut:unlockedTitles })); alert("Saved!");}
+function buySkin(s){
+ if(unlockedSkins.includes(s.n)){
+  skin=s;build();return;
+ }
+ if(total>=s.p*5){
+  total-=s.p*5;
+  unlockedSkins.push(s.n);
+  skin=s;
+  build();update();
+ }
+}
 
-const cursor=document.getElementById("cursor");
-document.addEventListener("mousemove",e=>{ cursor.style.left=e.clientX+"px"; cursor.style.top=e.clientY+"px";});
+/* ===== ACHIEVEMENTS ===== */
+function checkAchievements(){
+ achBox.querySelectorAll(".achievement,.achievement-desc").forEach(e=>e.remove());
 
-build(); update(); checkAchievements();
+ achievements.forEach(a=>{
+  const unlocked =
+   a.n==="Swordsman" && unlockedSwords.length>1 ||
+   a.n==="Collector" && (unlockedSwords.length+unlockedSkins.length)>=a.req ||
+   a.n==="Mastermind" && total>=a.req ||
+   a.n==="COMBOMASTER" && combo>=a.req;
+
+  if(unlocked && !unlockedTitles.includes(a.n)) unlockedTitles.push(a.n);
+
+  const div=document.createElement("div");
+  div.className="achievement"+(unlocked?"":" locked");
+  div.textContent=a.n;
+
+  div.onclick=()=>{
+   if(div.nextElementSibling?.classList.contains("achievement-desc")){
+    div.nextElementSibling.remove();
+    if(unlocked){currentTitle=a.n;update();}
+    return;
+   }
+   document.querySelectorAll(".achievement-desc").forEach(d=>d.remove());
+   const d=document.createElement("div");
+   d.className="achievement-desc";
+   d.textContent=a.desc;
+   div.after(d);
+  };
+
+  achBox.appendChild(div);
+ });
+}
+
+/* INIT */
+build();
+update();
+checkAchievements();
 </script>
-
 </body>
 </html>
+
