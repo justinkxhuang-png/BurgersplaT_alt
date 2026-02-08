@@ -27,25 +27,36 @@ box-shadow:0 0 30px #000;
 font-size:20px;
 flex-wrap:wrap;
 }
-.topItem{
-display:flex;
-align-items:center;
-gap:6px;
-color:#35e3ff;
-font-weight:800;
-}
+.topItem{display:flex;align-items:center;gap:6px;color:#35e3ff;font-weight:800;}
+
 #comboBarContainer{
 width:100px;height:12px;
+background:#0f2238;border-radius:12px;
+overflow:hidden;display:none;
+}
+#comboBar{height:100%;background:limegreen;width:0%;}
+
+/* BOSS BAR */
+#bossBarContainer{
+position:absolute;
+top:20px;
+width:60%;
+height:18px;
 background:#0f2238;
 border-radius:12px;
 overflow:hidden;
-display:none;
+box-shadow:0 0 20px black;
 }
-#comboBar{
+#bossBar{
 height:100%;
-background:limegreen;
-width:0%;
+background:crimson;
+width:100%;
 transition:width 0.1s linear;
+}
+#bossText{
+text-align:center;
+font-size:14px;
+margin-top:4px;
 }
 
 /* LAYOUT */
@@ -55,7 +66,6 @@ width:320px;
 background:#0d1626;
 padding:14px;
 overflow-y:auto;
-height:100vh;
 }
 #center{
 flex:1;
@@ -63,20 +73,19 @@ position:relative;
 display:flex;
 justify-content:center;
 align-items:center;
+flex-direction:column;
 }
 
-/* LEFT */
-#left{text-align:center;font-size:20px;}
+/* ACHIEVEMENTS */
 #achievementsHeader{
-font-size:24px;font-weight:800;
-margin-bottom:12px;color:#35e3ff;
+font-size:24px;font-weight:800;color:#35e3ff;
 }
 #achievementsList div{
 margin-top:12px;
 font-weight:800;
 cursor:pointer;
 }
-.achievement-desc{font-size:16px;color:#35e3ff;margin-bottom:10px;}
+.achievement-desc{font-size:16px;color:#35e3ff;}
 .locked-achievement{color:grey;}
 .unlocked-achievement{color:limegreen;}
 
@@ -84,31 +93,27 @@ cursor:pointer;
 .tabs button{
 width:33.33%;
 padding:14px;
-font-size:16px;
 background:#0f2238;
-border:none;
-color:white;
+border:none;color:white;
 cursor:pointer;
 }
-.tabs button.active{background:#35e3ff;color:black;font-weight:800;}
+.tabs button.active{
+background:#35e3ff;
+color:black;
+font-weight:800;
+}
 
 /* ITEMS */
 .item{
-display:flex;
-gap:12px;
+display:flex;gap:12px;
 background:#091728;
 margin-bottom:12px;
 padding:12px;
 border-left:8px solid;
 }
-.item img{width:72px;height:72px;object-fit:cover;}
-.item button{
-margin-top:6px;width:100%;
-padding:6px;
-font-family:inherit;
-cursor:pointer;
-}
-.item button.buyable{background:white;color:black;}
+.item img{width:72px;height:72px;}
+.item button{width:100%;margin-top:6px;}
+.buyable{background:white;color:black;cursor:pointer;}
 
 /* RARITIES */
 .common{border-color:#35e3ff;}
@@ -128,13 +133,12 @@ animation:rainbow 2s linear infinite;
 
 /* CHARACTER */
 #character{
-position:absolute;
 width:180px;
 cursor:pointer;
-transition:left 0.2s, top 0.2s;
+transition:0.2s;
 }
 
-/* FLOAT DAMAGE */
+/* FLOAT */
 .float{
 position:absolute;
 font-size:28px;
@@ -153,22 +157,20 @@ width:48px;height:48px;
 transform:translate(-50%,-50%);
 }
 
-/* ACHIEVEMENT POPUP */
+/* POPUP */
 #achievementPopup{
 position:fixed;
 bottom:40px;
 left:50%;
 transform:translateX(-50%) scale(0.8);
 background:linear-gradient(90deg,#35e3ff,#8af0ff);
-color:#000;
+color:black;
 padding:16px 28px;
 border-radius:12px;
 font-size:20px;
 font-weight:800;
-box-shadow:0 0 30px #35e3ff;
 opacity:0;
-pointer-events:none;
-transition:0.4s ease;
+transition:0.4s;
 z-index:999;
 }
 #achievementPopup.show{
@@ -191,11 +193,16 @@ transform:translateX(-50%) scale(1);
 
 <div id="game">
 <div id="left">
-<div id="achievementsHeader">ACHIEVEMENTS:</div>
+<div id="achievementsHeader">ACHIEVEMENTS</div>
 <div id="achievementsList"></div>
 </div>
 
 <div id="center">
+<div id="bossBarContainer">
+<div id="bossBar"></div>
+</div>
+<div id="bossText"></div>
+
 <img id="character" src="YIcheng_4.png">
 </div>
 
@@ -205,7 +212,6 @@ transform:translateX(-50%) scale(1);
 <button onclick="tab('skinDiv',this)">SKIN</button>
 <button onclick="save()">SAVE</button>
 </div>
-
 <div id="swordDiv"></div>
 <div id="skinDiv" style="display:none"></div>
 </div>
@@ -215,10 +221,10 @@ transform:translateX(-50%) scale(1);
 <div id="achievementPopup"></div>
 
 <script>
-// PRICE CONTROL
-const PRICE_MULTIPLIER = 2; // LOWER = CHEAPER
+/* ===== CONFIG ===== */
+const PRICE_MULTIPLIER = 2;
 
-// DATA
+/* ===== DATA ===== */
 const swords=[
 {n:"Wooden Sword",d:1,p:0,r:"common",img:"Wood.webp"},
 {n:"Iron Sword",d:10,p:300,r:"rare",img:"Iron.webp"},
@@ -235,43 +241,87 @@ const skins=[
 {n:"Forehead",img:"Wenyao_2.png",p:500,d:10,r:"common"},
 {n:"Grade 3 Pianist",img:"Wenyao.png",p:2500,d:50,r:"rare"},
 {n:"Entrepreneur",img:"Yicheng_3.png",p:10000,d:250,r:"mythic"},
-{n:"The Thinker",img:"Yicheng_5.png",p:50000,d:999,r:"mythic"},
-{n:"Ascended to Heaven",img:"Yicheng.png",p:150000,d:1500,r:"legendary"},
-{n:"Ben Lee",img:"Ben.png",p:500000,r:"secret",secret:true},
-{n:"Amare",img:"Amare.png",p:1000000,r:"secret",secret:true}
+{n:"The Thinker",img:"Yicheng_5.png",p:50000,cps:999,r:"mythic"},
+{n:"Ascended to Heaven",img:"Yicheng.png",p:150000,cps:1500,r:"legendary"}
 ];
 
-// SAVE
+const achievements=[
+{n:"SAVAGE",desc:"Reach 10,000 total damage",c:()=>total>=10000},
+{n:"RELENTLESS",desc:"Reach 100,000 total damage",c:()=>total>=100000},
+{n:"COMBOMASTER",desc:"Reach combo x100",c:()=>combo>=100},
+{n:"BOSS SLAYER",desc:"Defeat 10 bosses",c:()=>bossKills>=10},
+{n:"IMMORTAL",desc:"Defeat 100 bosses",c:()=>bossKills>=100}
+];
+
+/* ===== SAVE ===== */
 let saveData=JSON.parse(localStorage.getItem("save"))||{};
 let total=saveData.total||0;
-let sword=swords[0],skin=skins[0];
 let unlockedSwords=saveData.us||["Wooden Sword"];
 let unlockedSkins=saveData.uk||["Default"];
 let unlockedTitles=saveData.ut||[];
-let combo=0,comboTimer=0;
-let currentTitle="No Title";
+let bossKills=saveData.bk||0;
 
-// ELEMENTS
+/* ===== STATE ===== */
+let sword=swords[0],skin=skins[0];
+let combo=0,comboTimer=0;
+
+/* ===== BOSS ===== */
+let boss={
+maxHp:5000,
+hp:5000,
+reward:5000
+};
+
+/* ===== ELEMENTS ===== */
 const totalEl=document.getElementById("total");
 const dpcEl=document.getElementById("dpc");
-const swordDiv=document.getElementById("swordDiv");
-const skinDiv=document.getElementById("skinDiv");
-const character=document.getElementById("character");
-const achievementsList=document.getElementById("achievementsList");
 const comboEl=document.getElementById("combo");
 const comboBar=document.getElementById("comboBar");
 const comboBarContainer=document.getElementById("comboBarContainer");
+const bossBar=document.getElementById("bossBar");
+const bossText=document.getElementById("bossText");
+const character=document.getElementById("character");
+const swordDiv=document.getElementById("swordDiv");
+const skinDiv=document.getElementById("skinDiv");
+const achievementsList=document.getElementById("achievementsList");
 const achievementTitleEl=document.getElementById("achievementTitle");
 
-// CLICK
+/* ===== CLICK ===== */
 character.onclick=e=>{
+let dmg=sword.d+(skin.d||0);
 combo++; comboTimer=60;
-total+=sword.d + (skin.d||0);
-float(e.clientX,e.clientY,"+"+(sword.d+(skin.d||0)));
-move(); update();
+
+boss.hp-=dmg;
+float(e.clientX,e.clientY,"-"+dmg);
+
+if(boss.hp<=0){
+total+=boss.reward;
+bossKills++;
+boss.maxHp=Math.floor(boss.maxHp*1.35);
+boss.reward=Math.floor(boss.reward*1.3);
+boss.hp=boss.maxHp;
+}
+
+update();
+checkAchievements();
 };
 
-// COMBO
+/* ===== CPS ===== */
+setInterval(()=>{
+if(skin.cps){
+boss.hp-=skin.cps;
+if(boss.hp<=0){
+total+=boss.reward;
+bossKills++;
+boss.maxHp=Math.floor(boss.maxHp*1.35);
+boss.reward=Math.floor(boss.reward*1.3);
+boss.hp=boss.maxHp;
+}
+update();
+}
+},1000);
+
+/* ===== COMBO ===== */
 setInterval(()=>{
 if(comboTimer>0){
 comboTimer--;
@@ -280,18 +330,13 @@ comboBarContainer.style.display="block";
 comboBar.style.width=(comboTimer/60)*100+"%";
 }else{
 combo=0;
-comboBarContainer.style.display="none";
 comboEl.textContent="x1";
+comboBarContainer.style.display="none";
 }
 },50);
 
-function move(){
-character.style.left=Math.random()*75+"%";
-character.style.top=Math.random()*65+"%";
-}
-
+/* ===== FUNCTIONS ===== */
 function float(x,y,t){
-if(document.querySelectorAll(".float").length>20)return;
 let d=document.createElement("div");
 d.className="float";
 d.style.left=x+"px";
@@ -301,21 +346,53 @@ document.body.appendChild(d);
 setTimeout(()=>d.remove(),900);
 }
 
-// BUILD SHOP
+function achievementPopup(name){
+let p=document.getElementById("achievementPopup");
+p.textContent="🏆 ACHIEVEMENT UNLOCKED: "+name;
+p.classList.add("show");
+setTimeout(()=>p.classList.remove("show"),2500);
+achievementTitleEl.textContent=name;
+}
+
+function checkAchievements(){
+achievements.forEach(a=>{
+if(!unlockedTitles.includes(a.n)&&a.c()){
+unlockedTitles.push(a.n);
+achievementPopup(a.n);
+}
+});
+renderAchievements();
+}
+
+function renderAchievements(){
+achievementsList.innerHTML="";
+achievements.forEach(a=>{
+let div=document.createElement("div");
+div.textContent=a.n;
+div.className=unlockedTitles.includes(a.n)?"unlocked-achievement":"locked-achievement";
+div.onclick=()=>{
+let d=div.nextElementSibling;
+if(d&&d.classList.contains("achievement-desc")) d.remove();
+else{
+let desc=document.createElement("div");
+desc.className="achievement-desc";
+desc.textContent=a.desc;
+div.after(desc);
+}
+};
+achievementsList.appendChild(div);
+});
+}
+
 function build(){
 swordDiv.innerHTML="";
 swords.forEach(sw=>{
 let owned=unlockedSwords.includes(sw.n);
 swordDiv.innerHTML+=`
 <div class="item ${sw.r}">
-<img src="${sw.img}" style="${sw.secret&&!owned?'filter:brightness(0);':''}">
-<div>
-<b>${sw.secret&&!owned?"???":sw.n}</b><br>
-DMG: ${sw.secret&&!owned?"???":sw.d}<br>
-Cost: ${sw.p*PRICE_MULTIPLIER} DAMAGE
-<button class="${(!owned&&total>=sw.p*PRICE_MULTIPLIER?'buyable':'locked')}" onclick="buySword('${sw.n}')">
-${owned?"Equip":"Buy"}
-</button>
+<img src="${sw.img}">
+<div><b>${sw.n}</b><br>DMG: ${sw.d}<br>Cost: ${sw.p*PRICE_MULTIPLIER}
+<button class="${(!owned&&total>=sw.p*PRICE_MULTIPLIER?'buyable':'')}" onclick="buySword('${sw.n}')">${owned?"Equip":"Buy"}</button>
 </div></div>`;
 });
 
@@ -324,49 +401,27 @@ skins.forEach(sk=>{
 let owned=unlockedSkins.includes(sk.n);
 skinDiv.innerHTML+=`
 <div class="item ${sk.r}">
-<img src="${sk.img}" style="${sk.secret&&!owned?'filter:brightness(0);':''}">
-<div>
-<b>${sk.secret&&!owned?"???":sk.n}</b><br>
-DMG: ${sk.secret&&!owned?"???":sk.d||0}<br>
-Cost: ${sk.p*PRICE_MULTIPLIER} DAMAGE
-<button class="${(!owned&&total>=sk.p*PRICE_MULTIPLIER?'buyable':'locked')}" onclick="buySkin('${sk.n}')">
-${owned?"Equip":"Buy"}
-</button>
+<img src="${sk.img}">
+<div><b>${sk.n}</b><br>${sk.cps?`CPS: ${sk.cps}`:`DMG: ${sk.d}`}<br>Cost: ${sk.p*PRICE_MULTIPLIER}
+<button class="${(!owned&&total>=sk.p*PRICE_MULTIPLIER?'buyable':'')}" onclick="buySkin('${sk.n}')">${owned?"Equip":"Buy"}</button>
 </div></div>`;
 });
 }
 
-// BUY FUNCTIONS
 function buySword(n){
 let sw=swords.find(x=>x.n===n);
 if(unlockedSwords.includes(n)){sword=sw;return;}
 let cost=sw.p*PRICE_MULTIPLIER;
-if(total>=cost){
-total-=cost;
-unlockedSwords.push(n);
-sword=sw;
-build(); update();
-}
+if(total>=cost){total-=cost;unlockedSwords.push(n);sword=sw;update();}
 }
 
 function buySkin(n){
 let sk=skins.find(x=>x.n===n);
-if(unlockedSkins.includes(n)){
-skin=sk;
-character.src=sk.img;
-return;
-}
+if(unlockedSkins.includes(n)){skin=sk;character.src=sk.img;return;}
 let cost=sk.p*PRICE_MULTIPLIER;
-if(total>=cost){
-total-=cost;
-unlockedSkins.push(n);
-skin=sk;
-character.src=sk.img;
-build(); update();
-}
+if(total>=cost){total-=cost;unlockedSkins.push(n);skin=sk;character.src=sk.img;update();}
 }
 
-// UI
 function tab(id,b){
 swordDiv.style.display="none";
 skinDiv.style.display="none";
@@ -378,21 +433,26 @@ b.classList.add("active");
 function update(){
 totalEl.textContent=total;
 dpcEl.textContent=sword.d+(skin.d||0);
+bossBar.style.width=(boss.hp/boss.maxHp)*100+"%";
+bossText.textContent=`Boss HP: ${boss.hp} / ${boss.maxHp}`;
 build();
 }
 
 function save(){
-localStorage.setItem("save",JSON.stringify({total,us:unlockedSwords,uk:unlockedSkins,ut:unlockedTitles}));
+localStorage.setItem("save",JSON.stringify({
+total,us:unlockedSwords,uk:unlockedSkins,ut:unlockedTitles,bk:bossKills
+}));
 alert("Saved!");
 }
 
-// CURSOR
+/* CURSOR */
 const cursor=document.getElementById("cursor");
 document.addEventListener("mousemove",e=>{
 cursor.style.left=e.clientX+"px";
 cursor.style.top=e.clientY+"px";
 });
 
+renderAchievements();
 build();
 update();
 </script>
